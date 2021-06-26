@@ -1,5 +1,5 @@
 import axios from "axios";
-import CONFIG from "../../config.json";
+import CONFIG from "../config.json";
 
 export const USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
 export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
