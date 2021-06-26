@@ -7,6 +7,7 @@ npm install
 npm run build
 
 step 2:
+
  cd ../server
  npm install
  npm run build
