@@ -1,4 +1,6 @@
 import axios from "axios";
+import CONFIG from "../../config.json";
+
 export const USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
 export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
 export const USER_LOGOUT = "USER_LOGOUT";
@@ -8,7 +10,7 @@ export const USER_AUTHENTICATED_FAILED = "USER_AUTHENTICATED_FAILED";
 export const getUser = (accessToken) => {
   return (dispatch) => {
     axios
-      .get("http://localhost:5005/api/v1/users/", {
+      .get(`${CONFIG.SERVER_URL}/api/v1/users/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -38,7 +40,7 @@ export const getUser = (accessToken) => {
 
 export const userLogin = (data, dispatch) => {
   axios
-    .post("http://localhost:5005/api/v1/auth/login", {
+    .post(`${CONFIG.SERVER_URL}api/v1/auth/login`, {
       email: data.email,
       password: data.password,
     })
