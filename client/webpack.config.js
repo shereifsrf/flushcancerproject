@@ -6,7 +6,11 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /[(\.js)|(\.jsx)]$/,
+        test: /\.(s[ac]|c)ss$/i,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
@@ -15,8 +19,12 @@ module.exports = {
     ],
   },
 
+  resolve: {
+    extensions: [".js", ".jsx"],
+  },
+
   devtool: "source-map",
   devServer: {
-    contentBase: "./dist",
+    contentBase: "./public",
   },
 };
