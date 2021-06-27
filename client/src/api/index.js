@@ -40,7 +40,7 @@ export const getUser = (accessToken) => {
 
 export const userLogin = (data, dispatch) => {
   axios
-    .post(`${CONFIG.SERVER_URL}api/v1/auth/login`, {
+    .post(`${CONFIG.SERVER_URL}/api/v1/auth/login`, {
       email: data.email,
       password: data.password,
     })
