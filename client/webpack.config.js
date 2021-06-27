@@ -6,6 +6,7 @@ let mode = process.env.NODE_ENV === "production" ? "production" : "development";
 
 module.exports = {
   mode: mode,
+  target: "web",
   entry: "./src/index.js",
 
   output: {
@@ -47,5 +48,6 @@ module.exports = {
   devtool: "source-map",
   devServer: {
     contentBase: "./dist",
+    historyApiFallback: true,
   },
 };
