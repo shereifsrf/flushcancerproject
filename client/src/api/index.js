@@ -1,6 +1,11 @@
 import axios from "axios";
 import CONFIG from "../config.json";
 
+let url =
+  process.env.NODE_ENV === "production"
+    ? CONFIG.SERVER_URL
+    : "http://localhost:5005";
+
 export const USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
 export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
 export const USER_LOGOUT = "USER_LOGOUT";
@@ -10,7 +15,7 @@ export const USER_AUTHENTICATED_FAILED = "USER_AUTHENTICATED_FAILED";
 export const getUser = (accessToken) => {
   return (dispatch) => {
     axios
-      .get(`${CONFIG.SERVER_URL}/api/v1/users/`, {
+      .get(`${url}/api/v1/users/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
