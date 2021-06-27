@@ -1,10 +1,12 @@
+let mode = process.env.NODE_ENV === "production" ? "production" : "development";
+
 module.exports = {
-  mode: "development",
+  mode: mode,
 
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /[(\.js)|(\.jsx)]$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
@@ -13,7 +15,7 @@ module.exports = {
     ],
   },
 
-  devtool: false,
+  devtool: "source-map",
   devServer: {
     contentBase: "./dist",
   },
