@@ -4,10 +4,9 @@ const webpack = require("webpack");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-let mode = process.env.NODE_ENV === "production" ? "production" : "development";
-
+let isDev = process.env.NODE_ENV !== "production";
 module.exports = {
-  mode: mode,
+  mode: isDev ? "development" : "production",
   target: "web",
   entry: "./src/index.js",
 
@@ -42,8 +41,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
-    new webpack.HotModuleReplacementPlugin(),
-    new ReactRefreshWebpackPlugin(),
+    isDev && new webpack.HotModuleReplacementPlugin(),
+    isDev && new ReactRefreshWebpackPlugin(),
   ],
 
   resolve: {
