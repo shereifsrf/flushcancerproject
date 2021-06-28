@@ -55,7 +55,15 @@ const Login = (props) => {
     history.replace(redirectTo.current);
   }
 
-  // useEffect(() => {});
+  useEffect(() => {
+    if (state.hasError) {
+      setData({
+        ...data,
+        isSubmitting: false,
+        errorMessage: state.message,
+      });
+    }
+  }, [state]);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });

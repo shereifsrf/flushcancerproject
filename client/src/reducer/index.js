@@ -1,8 +1,10 @@
-export const USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
-export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
-export const USER_LOGOUT = "USER_LOGOUT";
-export const USER_AUTHENTICATED_SUCCESS = "USER_AUTHENTICATED_SUCCESS";
-export const USER_AUTHENTICATED_FAILED = "USER_AUTHENTICATED_FAILED";
+import {
+  USER_LOGIN_SUCCESS,
+  USER_LOGIN_FAILED,
+  USER_LOGOUT,
+  USER_AUTHENTICATED_SUCCESS,
+  USER_AUTHENTICATED_FAILED,
+} from "../api";
 
 export const reducer = (state, action) => {
   switch (action.type) {
@@ -18,7 +20,12 @@ export const reducer = (state, action) => {
       };
 
     case USER_LOGIN_FAILED:
-      return { ...state, isAuthenticated: false, message: action.message };
+      return {
+        ...state,
+        isAuthenticated: false,
+        hasError: true,
+        message: action.payload.message,
+      };
 
     case USER_LOGOUT:
       localStorage.clear();
