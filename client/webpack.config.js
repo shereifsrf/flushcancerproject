@@ -1,5 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 let mode = process.env.NODE_ENV === "production" ? "production" : "development";
@@ -11,6 +13,7 @@ module.exports = {
 
   output: {
     path: path.resolve(__dirname, "dist"),
+    publicPath: "/dist/",
     assetModuleFilename: "images/[hash][ext][query]",
   },
 
@@ -39,6 +42,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
+    new webpack.HotModuleReplacementPlugin(),
+    new ReactRefreshWebpackPlugin(),
   ],
 
   resolve: {

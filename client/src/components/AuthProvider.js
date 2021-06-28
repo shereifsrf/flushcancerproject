@@ -9,6 +9,7 @@ export function useAuthContext() {
 
 const initialState = {
   isAuthenticated: false,
+  hasError: false,
   message: "",
   user: null,
   token: null,
