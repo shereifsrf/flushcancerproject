@@ -17,6 +17,7 @@ import MoreIcon from "@material-ui/icons/MoreVert";
 import { useHistory } from "react-router-dom";
 import { USER_LOGOUT } from "../../../api";
 import { useAuthContext } from "../../AuthProvider";
+import { Link as RouterLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -78,6 +79,12 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     [theme.breakpoints.up("md")]: {
       display: "none",
+    },
+  },
+  landingPageLink: {
+    textDecoration: "none",
+    "&:visited": {
+      color: "inherit",
     },
   },
 }));
@@ -204,7 +211,9 @@ export default function TopNav() {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            FlushCancer
+            <RouterLink to="/" className={classes.landingPageLink}>
+              FlushCancer
+            </RouterLink>
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>

@@ -22,7 +22,11 @@ import useStyles from "./loginStyles";
 
 import { useActionContext } from "../ActionContext";
 import { useAuthContext } from "../../AuthProvider";
-import { userLogin } from "../../../api";
+import {
+  autoAuthenticateUser,
+  userLogin,
+  USER_AUTHENTICATED_SUCCESS,
+} from "../../../api";
 import { useHistory, useLocation } from "react-router-dom";
 import { useRef } from "react";
 
@@ -50,11 +54,6 @@ const Login = (props) => {
   const [data, setData] = useState(initialState);
   const classes = useStyles();
 
-  if (state.isAuthenticated) {
-    console.log(state);
-    history.replace(redirectTo.current);
-  }
-
   useEffect(() => {
     if (state.hasError) {
       setData({
@@ -62,6 +61,10 @@ const Login = (props) => {
         isSubmitting: false,
         errorMessage: state.message,
       });
+    } else if (state.isAuthenticated) {
+      history.replace(redirectTo.current);
+    } else {
+      autoAuthenticateUser(dispatch);
     }
   }, [state]);
 
@@ -76,7 +79,10 @@ const Login = (props) => {
       isSubmitting: true,
       errorMessage: null,
     });
-    userLogin({ email: data.email, password: data.password }, dispatch);
+    if (isSignUp) {
+    } else {
+      userLogin({ email: data.email, password: data.password }, dispatch);
+    }
   };
 
   const handleClickShowPassword = (field) => {

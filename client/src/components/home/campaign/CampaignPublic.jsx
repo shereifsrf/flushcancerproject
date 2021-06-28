@@ -109,7 +109,7 @@ export default function CampaignPublic() {
               Similar
               {campaign3.map((c) => (
                 <Box key={c.id} component="li" fontSize={20}>
-                  <Link component={RouterLink} to={`/public-campaign/${c.id}`}>
+                  <Link component={RouterLink} to={`/public-campaigns/${c.id}`}>
                     {limitCharWithDots(c.name, 25)}
                   </Link>
                 </Box>
