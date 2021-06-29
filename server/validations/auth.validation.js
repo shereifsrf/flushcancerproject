@@ -4,6 +4,7 @@ module.exports = {
   // POST /v1/auth/register
   register: {
     body: Joi.object({
+      name: Joi.string().required(),
       email: Joi.string().email().required(),
       password: Joi.string().required().min(6).max(128),
     }),
@@ -29,6 +30,13 @@ module.exports = {
   refresh: {
     body: Joi.object({
       email: Joi.string().email().required(),
+      refreshToken: Joi.string().required(),
+    }),
+  },
+
+  // POST /v1/auth/verify-user
+  verifyUser: {
+    body: Joi.object({
       refreshToken: Joi.string().required(),
     }),
   },

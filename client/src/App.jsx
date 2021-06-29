@@ -19,6 +19,7 @@ import {
 } from "react-router-dom";
 import ActionProvider from "./components/general/ActionContext";
 import AuthProvider, { useAuthContext } from "./components/AuthProvider";
+import UserVerification from "./components/general/userVerification/UserVerification";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -60,6 +61,12 @@ const App = () => {
                 <TopNavLogin />
                 <Login />
               </ActionProvider>
+            </Route>
+            <Route exact path="/user-verify">
+              <UserVerification />
+            </Route>
+            <Route exact path="/user-verify/:refreshToken">
+              <UserVerification />
             </Route>
             <PrivateRoute exact path="/home">
               <TopNavDash />

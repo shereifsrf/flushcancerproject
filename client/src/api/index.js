@@ -6,6 +6,8 @@ export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
 export const USER_LOGOUT = "USER_LOGOUT";
 export const AUTO_AUTH_SUCCESS = "AUTO_AUTH_SUCCESS";
 export const AUTO_AUTH_FAILED = "AUTO_AUTH_FAILED";
+export const USER_REGISTRATION_SUCCESS = "USER_REGISTRATION_SUCCESS";
+export const USER_REGISTRATION_FAILED = "USER_REGISTRATION_FAILED";
 
 let url =
   process.env.NODE_ENV === "production"
@@ -85,6 +87,42 @@ export const userLogin = (data, dispatch) => {
       }
       dispatch({
         type: USER_LOGIN_FAILED,
+        payload: { status: err.status, message: msg },
+      });
+      return {};
+    });
+};
+
+export const userRegister = (data, dispatch) => {
+  axios
+    .post(`${url}/api/v1/auth/register`, {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    })
+    .then((res) => {
+      if (res.status === 200) {
+        dispatch({
+          type: USER_REGISTRATION_SUCCESS,
+          payload: { message: res.data },
+        });
+      }
+    })
+    .catch((error) => {
+      let err = error.response || {};
+      //TODO: even status is OK, this code still runs, check why
+      let msg = "Error Encountered";
+      if (err.data) {
+        if (err.data.message) {
+          if (Array.isArray(err.data.message)) {
+            msg = err.data.message[0].message;
+          } else {
+            msg = err.data.message;
+          }
+        }
+      }
+      dispatch({
+        type: USER_REGISTRATION_FAILED,
         payload: { status: err.status, message: msg },
       });
       return {};

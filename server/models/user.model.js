@@ -4,7 +4,7 @@ const { omitBy, isNil } = require("lodash");
 const bcrypt = require("bcryptjs");
 const moment = require("moment-timezone");
 const jwt = require("jwt-simple");
-const {v4: uuidv4} = require("uuid");
+const { v4: uuidv4 } = require("uuid");
 const APIError = require("../utils/APIError");
 const { env, jwtSecret, jwtExpirationInterval } = require("../config/vars");
 
@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema(
     picture: {
       type: String,
       trim: true,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

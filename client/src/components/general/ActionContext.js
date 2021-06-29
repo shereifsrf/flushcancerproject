@@ -22,7 +22,7 @@ export default function ActionProvider({ children }) {
   const location = useLocation();
   const path = useRouteMatch().path;
 
-  let { from } = location.state || { from: { pathname: "/profile" } };
+  let { from } = location.state || { from: { pathname: "/home" } };
 
   useEffect(() => {
     let customPath = generatePath(path, {

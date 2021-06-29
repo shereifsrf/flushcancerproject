@@ -30,6 +30,31 @@ function generateTokenResponse(user, accessToken) {
  */
 exports.register = async (req, res, next) => {
   try {
+    const userData = { ...req.body, role: "user" };
+    const user = await new User(userData).save();
+    const userTransformed = user.transform();
+    const token = generateTokenResponse(user, user.token());
+
+    if (token && userTransformed) {
+      // const userObj = await PasswordResetToken.generate(user);
+      emailProvider.sendEmailVerification({
+        token: token,
+        user: userTransformed,
+      });
+      res.status(httpStatus.OK);
+      return res.json("success");
+    }
+    throw new APIError({
+      status: httpStatus.UNAUTHORIZED,
+      message: "Oops, something wrong! Contact our admin",
+    });
+  } catch (error) {
+    return next(User.checkDuplicateEmail(error));
+  }
+};
+
+exports.register_old = async (req, res, next) => {
+  try {
     const userData = omit(req.body, "role");
     const user = await new User(userData).save();
     const userTransformed = user.transform();
@@ -90,6 +115,24 @@ exports.refresh = async (req, res, next) => {
     });
     const response = generateTokenResponse(user, accessToken);
     return res.json(response);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.verifyUserEmail = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    const refreshObject = await RefreshToken.findOneAndRemove({
+      token: refreshToken,
+    });
+    const { user, accessToken } = await User.findAndGenerateToken({
+      email: refreshObject.userEmail,
+      refreshObject,
+    });
+    const userTransformed = user.transform();
+    const token = generateTokenResponse(user, accessToken);
+    return res.json({ token, user: userTransformed });
   } catch (error) {
     return next(error);
   }

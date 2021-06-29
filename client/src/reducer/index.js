@@ -4,6 +4,8 @@ import {
   USER_LOGOUT,
   AUTO_AUTH_SUCCESS,
   AUTO_AUTH_FAILED,
+  USER_REGISTRATION_SUCCESS,
+  USER_REGISTRATION_FAILED,
 } from "../api";
 
 export const reducer = (state, action) => {
@@ -37,6 +39,11 @@ export const reducer = (state, action) => {
         isAuthenticated: false,
         user: null,
       };
+
+    case USER_REGISTRATION_SUCCESS:
+      return { ...state, hasError: false, message: data.message };
+    case USER_REGISTRATION_FAILED:
+      return { ...state, hasError: true, message: data.message };
 
     case AUTO_AUTH_SUCCESS:
       localStorage.setItem("token", JSON.stringify(data));

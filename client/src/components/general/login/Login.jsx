@@ -16,17 +16,16 @@ import {
   IconButton,
   FormControl,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContentText,
 } from "@material-ui/core";
 import { Visibility, VisibilityOff, LockOutlined } from "@material-ui/icons";
 import useStyles from "./loginStyles";
 
 import { useActionContext } from "../ActionContext";
 import { useAuthContext } from "../../AuthProvider";
-import {
-  autoAuthenticateUser,
-  userLogin,
-  USER_AUTHENTICATED_SUCCESS,
-} from "../../../api";
+import { autoAuthenticateUser, userLogin, userRegister } from "../../../api";
 import { useHistory, useLocation } from "react-router-dom";
 import { useRef } from "react";
 
@@ -41,6 +40,37 @@ const initialState = {
   showConfPassword: false,
   isSubmitting: false,
   errorMessage: null,
+};
+
+const verifyDialog = (props) => {
+  const [open, setOpen] = React.useState(props);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">
+        {"Use Google's location service?"}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          An email with verification link has been sent to the email address
+          provided.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="primary" autoFocus>
+          Okay
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 const Login = (props) => {
@@ -63,7 +93,11 @@ const Login = (props) => {
       });
     } else if (state.isAuthenticated) {
       history.replace(redirectTo.current);
-    } else {
+    } else if (isSignUp) {
+      if (state.message.toLowerCase() === "success") {
+        history.replace("/user-verify");
+      }
+    } else if (!isSignUp) {
       autoAuthenticateUser(dispatch);
     }
   }, [state]);
@@ -80,6 +114,14 @@ const Login = (props) => {
       errorMessage: null,
     });
     if (isSignUp) {
+      userRegister(
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        },
+        dispatch
+      );
     } else {
       userLogin({ email: data.email, password: data.password }, dispatch);
     }

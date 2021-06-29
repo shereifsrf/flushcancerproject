@@ -32,6 +32,7 @@ exports.sendPasswordReset = async (passwordResetObject) => {
     },
     // uncomment below to send emails in development/test env:
     send: true,
+    preview: false,
     transport: transporter,
   });
 
@@ -49,6 +50,35 @@ exports.sendPasswordReset = async (passwordResetObject) => {
       },
     })
     .catch(() => console.log("error sending password reset email"));
+};
+
+exports.sendEmailVerification = async (emailVerObj) => {
+  const email = new Email({
+    views: { root: __dirname },
+    message: {
+      from: "flushcancerproject@gmail.com",
+    },
+    // uncomment below to send emails in development/test env:
+    send: true,
+    preview: false,
+    transport: transporter,
+  });
+
+  email
+    .send({
+      template: "emailVerification",
+      message: {
+        to: emailVerObj.user.email,
+      },
+      locals: {
+        productName: "Flush Cancer Project",
+        userName: emailVerObj.user.name,
+        // passwordResetUrl should be a URL to your app that displays a view where they
+        // can enter a new password along with passing the resetToken in the params
+        emailVerificationUrl: `http://localhost:8080/user-verify/${emailVerObj.token.refreshToken}`,
+      },
+    })
+    .catch(() => console.log("error sending user verification email"));
 };
 
 exports.sendPasswordChangeEmail = async (user) => {
