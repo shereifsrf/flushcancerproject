@@ -5,5 +5,9 @@ const url = process.env.SERVER_URL;
 const urlL = process.env.LOCAL_URL;
 
 export default function AlertDialog(props) {
-  return <>{mode}</>;
+  return (
+    <>
+      {mode} <br /> {url}
+    </>
+  );
 }
