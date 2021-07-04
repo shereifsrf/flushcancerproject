@@ -3,10 +3,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const Dotenv = require("dotenv-webpack");
 
 let mode = process.env.NODE_ENV || "development";
-let serverUrl = process.env.SERVER_URL;
 
 module.exports = (env, options) => {
   let isDev = mode !== "production";
@@ -18,7 +16,6 @@ module.exports = (env, options) => {
   ];
 
   if (isDev) {
-    plugins.push(new Dotenv());
     plugins.push(new webpack.HotModuleReplacementPlugin());
     plugins.push(new ReactRefreshWebpackPlugin());
   }
