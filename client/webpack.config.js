@@ -10,7 +10,6 @@ let mode = process.env.NODE_ENV || "development";
 module.exports = (env, options) => {
   let isDev = mode !== "production";
   let plugins = [
-    new Dotenv(),
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
@@ -18,8 +17,11 @@ module.exports = (env, options) => {
   ];
 
   if (isDev) {
+    plugins.push(new Dotenv());
     plugins.push(new webpack.HotModuleReplacementPlugin());
     plugins.push(new ReactRefreshWebpackPlugin());
+  } else {
+    plugins.push(new Dotenv({ path: path.resolve(__dirname, ".env.netlify") }));
   }
 
   return {
