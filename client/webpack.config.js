@@ -9,7 +9,14 @@ module.exports = (env, options) => {
   const mode = process.env.NODE_ENV || "development";
   const isDev = mode !== "production";
 
-  console.log({ magic: [process.env.SERVER_URL, process.env.NODE_ENV, isDev] });
+  console.log({
+    magic: [
+      process.env.SERVER_URL,
+      process.env.NODE_ENV,
+      process.env.LOCAL_URL,
+      isDev,
+    ],
+  });
 
   let plugins = [
     // new webpack.DefinePlugin({
@@ -29,7 +36,9 @@ module.exports = (env, options) => {
     plugins.push(new webpack.HotModuleReplacementPlugin());
     plugins.push(new ReactRefreshWebpackPlugin());
   } else {
-    plugins.push(new webpack.EnvironmentPlugin(["NODE_ENV", "SERVER_URL"]));
+    plugins.push(
+      new webpack.EnvironmentPlugin(["NODE_ENV", "SERVER_URL", "LOCAL_URL"])
+    );
   }
 
   return {
