@@ -21,6 +21,7 @@
     "start": "webpack serve",
     "watch": "webpack --watch",
     "build": "webpack",
+    "build-dev": "set NODE_ENV=development&& set SERVER_URL=httpkjsk&& webpack",
     "clean": "rmdir /S /Q dist"
   },
   "devDependencies": {
