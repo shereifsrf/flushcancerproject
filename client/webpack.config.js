@@ -11,13 +11,6 @@ let serverUrl = process.env.REACT_APP_SERVER_URL || "localhost";
 module.exports = (env, options) => {
   let isDev = mode.trim() !== "production";
   let plugins = [
-    new webpack.DefinePlugin({
-      "process.env": {
-        // defaults the environment to development if not specified
-        NODE_ENV: JSON.stringify(mode),
-        SERVER_URL: JSON.stringify(serverUrl),
-      },
-    }),
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
