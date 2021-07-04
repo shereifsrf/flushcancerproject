@@ -39,7 +39,7 @@ const PrivateRoute = ({ children, ...rest }) => {
           children
         ) : (
           <Redirect
-            to={{ pathname: "/accont/login", state: { from: location } }}
+            to={{ pathname: "/account/login", state: { from: location } }}
           />
         )
       }
@@ -56,14 +56,11 @@ const App = () => {
         <div className={classes.root}>
           <Switch>
             <Route exact path="/" component={MainHome} />
-            <Route exact path="/accont/:action">
+            <Route exact path="/account/:action">
               <ActionProvider>
                 <TopNavLogin />
                 <Login />
               </ActionProvider>
-            </Route>
-            <Route exact path="/user-verify">
-              <UserVerification />
             </Route>
             <Route exact path="/user-verify/:refreshToken">
               <UserVerification />

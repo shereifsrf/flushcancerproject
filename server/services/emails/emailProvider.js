@@ -2,6 +2,8 @@ const nodemailer = require("nodemailer");
 const { emailConfig } = require("../../config/vars");
 const Email = require("email-templates");
 
+const domainUrl = "http://localhost:8080";
+
 // SMTP is the main transport in Nodemailer for delivering messages.
 // SMTP is also the protocol used between almost all email hosts, so its truly universal.
 // if you dont want to use SMTP you can create your own transport here
@@ -75,7 +77,7 @@ exports.sendEmailVerification = async (emailVerObj) => {
         userName: emailVerObj.user.name,
         // passwordResetUrl should be a URL to your app that displays a view where they
         // can enter a new password along with passing the resetToken in the params
-        emailVerificationUrl: `http://localhost:8080/user-verify/${emailVerObj.token.refreshToken}`,
+        emailVerificationUrl: `${domainUrl}/user-verify/${emailVerObj.token.refreshToken}`,
       },
     })
     .catch(() => console.log("error sending user verification email"));

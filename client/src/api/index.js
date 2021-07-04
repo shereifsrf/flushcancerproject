@@ -1,18 +1,22 @@
 import axios from "axios";
 import CONFIG from "../config.json";
-
-export const USER_LOGIN_SUCCESS = "USER_LOGIN_SUCCESS";
-export const USER_LOGIN_FAILED = "USER_LOGIN_FAILED";
-export const USER_LOGOUT = "USER_LOGOUT";
-export const AUTO_AUTH_SUCCESS = "AUTO_AUTH_SUCCESS";
-export const AUTO_AUTH_FAILED = "AUTO_AUTH_FAILED";
-export const USER_REGISTRATION_SUCCESS = "USER_REGISTRATION_SUCCESS";
-export const USER_REGISTRATION_FAILED = "USER_REGISTRATION_FAILED";
+import {
+  AUTO_AUTH_SUCCESS,
+  INITIAL,
+  USER_LOGIN_FAILED,
+  USER_LOGIN_SUCCESS,
+  USER_REGISTRATION_FAILED,
+  USER_REGISTRATION_SUCCESS,
+} from "../constants";
 
 let url =
   process.env.NODE_ENV === "production"
     ? CONFIG.SERVER_URL
     : "http://localhost:5005";
+
+export const initState = (dispatch) => {
+  dispatch({ type: INITIAL });
+};
 
 export const autoAuthenticateUser = (dispatch) => {
   const token = localStorage.getItem("token");
@@ -53,6 +57,38 @@ const refreshToken = (data, dispatch) => {
           }
         }
       }
+      dispatch({
+        type: USER_LOGIN_FAILED,
+        payload: { status: err.status, message: msg },
+      });
+      return {};
+    });
+};
+
+export const userVerify = (data, dispatch) => {
+  axios
+    .post(`${url}/api/v1/auth/verify-user`, {
+      refreshToken: data.refreshToken,
+    })
+    .then((res) => {
+      if (res.status === 200) {
+        dispatch({ type: USER_LOGIN_SUCCESS, payload: res.data });
+      }
+    })
+    .catch((error) => {
+      let err = error.response || {};
+      //TODO: even status is OK, this code still runs, check why
+      let msg = "Error Encountered";
+      if (err.data) {
+        if (err.data.message) {
+          if (Array.isArray(err.data.message)) {
+            msg = err.data.message[0].message;
+          } else {
+            msg = err.data.message;
+          }
+        }
+      }
+
       dispatch({
         type: USER_LOGIN_FAILED,
         payload: { status: err.status, message: msg },
@@ -113,7 +149,14 @@ export const userRegister = (data, dispatch) => {
       //TODO: even status is OK, this code still runs, check why
       let msg = "Error Encountered";
       if (err.data) {
-        if (err.data.message) {
+        if (err.data.errors) {
+          if (Array.isArray(err.data.errors)) {
+            if (Array.isArray(err.data.errors[0].messages))
+              msg = err.data.errors[0].messages[0];
+          } else {
+            msg = err.data.message;
+          }
+        } else if (err.data.message) {
           if (Array.isArray(err.data.message)) {
             msg = err.data.message[0].message;
           } else {

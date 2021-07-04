@@ -15,7 +15,7 @@ import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import { useHistory } from "react-router-dom";
-import { USER_LOGOUT } from "../../../api";
+import { USER_LOGOUT } from "../../../constants";
 import { useAuthContext } from "../../AuthProvider";
 import { Link as RouterLink } from "react-router-dom";
 

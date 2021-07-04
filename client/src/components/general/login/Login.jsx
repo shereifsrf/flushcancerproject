@@ -28,6 +28,7 @@ import { useAuthContext } from "../../AuthProvider";
 import { autoAuthenticateUser, userLogin, userRegister } from "../../../api";
 import { useHistory, useLocation } from "react-router-dom";
 import { useRef } from "react";
+import AlertDialog from "../AlertDialog";
 
 const initialState = {
   email: "",
@@ -40,41 +41,12 @@ const initialState = {
   showConfPassword: false,
   isSubmitting: false,
   errorMessage: null,
-};
-
-const verifyDialog = (props) => {
-  const [open, setOpen] = React.useState(props);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-    >
-      <DialogTitle id="alert-dialog-title">
-        {"Use Google's location service?"}
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          An email with verification link has been sent to the email address
-          provided.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary" autoFocus>
-          Okay
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+  alertSuccess: false,
+  isAutoAuth: false,
 };
 
 const Login = (props) => {
-  const { isSignUp } = useActionContext();
+  const { isSignUp, toggleAction } = useActionContext();
   const location = useLocation();
   let history = useHistory();
 
@@ -89,15 +61,18 @@ const Login = (props) => {
       setData({
         ...data,
         isSubmitting: false,
-        errorMessage: state.message,
+        errorMessage: !data.isAutoAuth ? state.message : "",
       });
     } else if (state.isAuthenticated) {
       history.replace(redirectTo.current);
     } else if (isSignUp) {
       if (state.message.toLowerCase() === "success") {
-        history.replace("/user-verify");
+        //        history.replace("/user-verify");
+        setData({ ...initialState, alertSuccess: true });
+        toggleAction();
       }
     } else if (!isSignUp) {
+      setData({ ...data, isAutoAuth: true });
       autoAuthenticateUser(dispatch);
     }
   }, [state]);
@@ -112,6 +87,7 @@ const Login = (props) => {
       ...data,
       isSubmitting: true,
       errorMessage: null,
+      isAutoAuth: false,
     });
     if (isSignUp) {
       userRegister(
@@ -142,6 +118,14 @@ const Login = (props) => {
     <>
       <CssBaseline />
       <Container component="main" className={classes.main} maxWidth="xs">
+        {data.alertSuccess && (
+          <AlertDialog
+            open={true}
+            title="Email Notification Sent"
+            contentText="An email with verification link has been sent to the email address provided."
+            buttonText="Okay"
+          />
+        )}
         <div className={classes.paper}>
           <Avatar className={classes.avatar} variant="square">
             <LockOutlined />
@@ -159,6 +143,7 @@ const Login = (props) => {
                 label="Full Name"
                 name="name"
                 autoComplete="name"
+                value={data.name}
                 onChange={handleChange}
               />
             )}
@@ -172,6 +157,7 @@ const Login = (props) => {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                value={data.email}
                 onChange={handleChange}
                 autoFocus
               />

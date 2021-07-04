@@ -123,13 +123,30 @@ exports.refresh = async (req, res, next) => {
 exports.verifyUserEmail = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
+    let { user, accessToken } = { user: {}, accessToken: {} };
+    let email = "";
     const refreshObject = await RefreshToken.findOneAndRemove({
       token: refreshToken,
     });
-    const { user, accessToken } = await User.findAndGenerateToken({
-      email: refreshObject.userEmail,
-      refreshObject,
-    });
+    if (refreshObject) {
+      email = refreshObject.userEmail;
+      user = await User.findOneAndUpdate(
+        { email },
+        { isEmailVerified: true },
+        { new: true }
+      );
+      // await user.save();
+
+      ({ user, accessToken } = await User.findAndGenerateToken({
+        email,
+        refreshObject,
+      }));
+    } else {
+      throw new APIError({
+        status: httpStatus.NOT_FOUND,
+        message: "Invalid link, please contact admin!",
+      });
+    }
     const userTransformed = user.transform();
     const token = generateTokenResponse(user, accessToken);
     return res.json({ token, user: userTransformed });

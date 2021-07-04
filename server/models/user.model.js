@@ -164,9 +164,13 @@ userSchema.statics = {
     };
     if (password) {
       if (user && (await user.passwordMatches(password))) {
-        return { user, accessToken: user.token() };
+        if (user.isEmailVerified) {
+          return { user, accessToken: user.token() };
+        }
+        err.message = "User not verified";
+      } else {
+        err.message = "Incorrect email or password";
       }
-      err.message = "Incorrect email or password";
     } else if (refreshObject && refreshObject.userEmail === email) {
       if (moment(refreshObject.expires).isBefore()) {
         err.message = "Invalid refresh token.";
