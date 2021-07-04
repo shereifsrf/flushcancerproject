@@ -21,16 +21,6 @@ module.exports = (env, options) => {
     plugins.push(new Dotenv());
     plugins.push(new webpack.HotModuleReplacementPlugin());
     plugins.push(new ReactRefreshWebpackPlugin());
-  } else {
-    plugins.push(
-      new webpack.DefinePlugin({
-        "process.env": {
-          // defaults the environment to development if not specified
-          NODE_ENV: JSON.stringify(mode),
-          SERVER_URL: JSON.stringify(serverUrl),
-        },
-      })
-    );
   }
 
   return {
