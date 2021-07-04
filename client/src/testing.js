@@ -1,6 +1,6 @@
 import React from "react";
-
+let url = process.env.NODE_ENV;
 export default function AlertDialog(props) {
-  const mode = process.env.NODE_ENV;
-  return <>{mode}</>;
+  console.log(props);
+  return <>{url}</>;
 }

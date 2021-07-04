@@ -7,5 +7,5 @@ module.exports = {
     ],
     ["@babel/preset-react", { runtime: "automatic" }],
   ],
-  plugins: [!isDev && ["react-refresh/babel"]].filter(Boolean),
+  plugins: [isDev && ["react-refresh/babel"]].filter(Boolean),
 };

@@ -5,12 +5,21 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
-let mode = process.env.NODE_ENV || "development";
-let serverUrl = process.env.REACT_APP_SERVER_URL || "localhost";
+const mode = process.env.NODE_ENV || "development";
+const serverUrl = process.env.SERVER_URL;
 
 module.exports = (env, options) => {
-  let isDev = mode.trim() !== "production";
+  const isDev = mode.trim() !== "production";
+
   let plugins = [
+    new Dotenv(),
+    // new webpack.DefinePlugin({
+    //   "process.env": {
+    //     // defaults the environment to development if not specified
+    //     NODE_ENV: JSON.stringify(mode),
+    //     SERVER_URL: JSON.stringify(serverUrl),
+    //   },
+    // }),
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
