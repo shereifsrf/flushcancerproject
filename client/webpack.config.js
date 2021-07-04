@@ -22,7 +22,12 @@ module.exports = (env, options) => {
     plugins.push(new ReactRefreshWebpackPlugin());
   } else {
     plugins.push(
-      new Dotenv({ path: path.resolve(__dirname, "./.env.netlify") })
+      new webpack.DefinePlugin({
+        "process.env": {
+          // defaults the environment to development if not specified
+          NODE_ENV: JSON.stringify(mode),
+        },
+      })
     );
   }
 
