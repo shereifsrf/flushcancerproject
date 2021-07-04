@@ -1,6 +1,9 @@
 import React from "react";
-let url = process.env.NODE_ENV;
+const urlH = process.env.SERVER_URL;
+const envH = process.env.NODE_URL;
 export default function AlertDialog(props) {
-  console.log(props);
-  return <>{url}</>;
+  let url = process.env.SERVER_URL;
+  let env = process.env.NODE_URL;
+  console.log({ magic: [url, urlH, env, envH] });
+  return <></>;
 }
