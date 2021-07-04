@@ -26,6 +26,7 @@ module.exports = (env, options) => {
         "process.env": {
           // defaults the environment to development if not specified
           NODE_ENV: JSON.stringify(mode),
+          SERVER_URL: JSON.stringify(process.env.SERVER_URL),
         },
       })
     );
