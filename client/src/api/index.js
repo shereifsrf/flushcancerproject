@@ -1,5 +1,4 @@
 import axios from "axios";
-import CONFIG from "../config.json";
 import {
   AUTO_AUTH_SUCCESS,
   INITIAL,
@@ -9,10 +8,10 @@ import {
   USER_REGISTRATION_SUCCESS,
 } from "../constants";
 
-let url =
-  process.env.NODE_ENV === "production"
-    ? CONFIG.SERVER_URL
-    : "http://localhost:5005";
+const mode = process.env.NODE_ENV;
+const serverUrl = process.env.SERVER_URL;
+const localUrl = process.env.LOCAL_URL;
+let url = mode === "production" ? serverUrl : localUrl;
 
 export const initState = (dispatch) => {
   dispatch({ type: INITIAL });

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { initState, userVerify } from "../../../api";
+import { initState, userVerify } from "Api";
 import { COMPLETED, FAILED } from "../../../constants";
 import { useAuthContext } from "../../AuthProvider";
 import AlertDialog from "../AlertDialog";

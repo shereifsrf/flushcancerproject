@@ -16,16 +16,13 @@ import {
   IconButton,
   FormControl,
   Box,
-  Dialog,
-  DialogTitle,
-  DialogContentText,
 } from "@material-ui/core";
 import { Visibility, VisibilityOff, LockOutlined } from "@material-ui/icons";
 import useStyles from "./loginStyles";
 
 import { useActionContext } from "../ActionContext";
 import { useAuthContext } from "../../AuthProvider";
-import { autoAuthenticateUser, userLogin, userRegister } from "../../../api";
+import { autoAuthenticateUser, userLogin, userRegister } from "Api";
 import { useHistory, useLocation } from "react-router-dom";
 import { useRef } from "react";
 import AlertDialog from "../AlertDialog";

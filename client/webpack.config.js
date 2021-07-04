@@ -3,57 +3,77 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
+const CompressionPlugin = require("compression-webpack-plugin");
 
-let isDev = process.env.NODE_ENV !== "production";
-module.exports = {
-  mode: isDev ? "development" : "production",
-  target: "web",
-  entry: "./src/index.js",
+let mode = process.env.NODE_ENV || "development";
 
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    publicPath: "/",
-    assetModuleFilename: "images/[hash][ext][query]",
-  },
-
-  module: {
-    rules: [
-      {
-        test: /\.(png|jpe?g|gif|svg)$/i,
-        type: "asset",
-      },
-      {
-        test: /\.(s[ac]|c)ss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
-      },
-      {
-        test: /\.jsx?$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
-      },
-    ],
-  },
-
-  plugins: [
+module.exports = (env, options) => {
+  let isDev = mode !== "production";
+  let plugins = [
+    new CompressionPlugin(),
+    new Dotenv(),
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
-    isDev && new webpack.HotModuleReplacementPlugin(),
-    isDev && new ReactRefreshWebpackPlugin(),
-  ],
+  ];
 
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
+  if (isDev) {
+    plugins.push(new webpack.HotModuleReplacementPlugin());
+    plugins.push(new ReactRefreshWebpackPlugin());
+  }
 
-  devtool: "source-map",
-  devServer: {
-    contentBase: "./dist",
-    historyApiFallback: {
-      disableDotRule: true,
+  return {
+    mode,
+    target: "web",
+    entry: "./src/index.js",
+
+    output: {
+      path: path.resolve(__dirname, "dist"),
+      publicPath: "/",
+      assetModuleFilename: "images/[hash][ext][query]",
     },
-  },
+
+    module: {
+      rules: [
+        {
+          test: /\.(png|jpe?g|gif|svg)$/i,
+          type: "asset",
+        },
+        {
+          test: /\.(s[ac]|c)ss$/i,
+          use: ["style-loader", "css-loader", "sass-loader"],
+        },
+        {
+          test: /\.jsx?$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+          },
+        },
+      ],
+    },
+    stats: { errorDetails: true },
+    performance: {
+      hints: false,
+    },
+
+    plugins,
+
+    resolve: {
+      alias: {
+        Api: path.resolve(__dirname, "src/api"),
+      },
+      extensions: [".js", ".jsx"],
+    },
+
+    devtool: "source-map",
+    devServer: {
+      contentBase: "./dist",
+      historyApiFallback: {
+        disableDotRule: true,
+      },
+    },
+  };
 };
