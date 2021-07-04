@@ -8,7 +8,7 @@ const Dotenv = require("dotenv-webpack");
 let mode = process.env.NODE_ENV || "development";
 
 module.exports = (env, options) => {
-  let isDev = mode !== "production";
+  let isDev = mode.trim() !== "production";
   let plugins = [
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
