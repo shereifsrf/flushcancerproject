@@ -6,6 +6,7 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 const Dotenv = require("dotenv-webpack");
 
 let mode = process.env.NODE_ENV || "development";
+let serverUrl = process.env.SERVER_URL;
 
 module.exports = (env, options) => {
   let isDev = mode !== "production";
@@ -26,7 +27,7 @@ module.exports = (env, options) => {
         "process.env": {
           // defaults the environment to development if not specified
           NODE_ENV: JSON.stringify(mode),
-          SERVER_URL: JSON.stringify(process.env.SERVER_URL),
+          SERVER_URL: JSON.stringify(serverUrl),
         },
       })
     );
