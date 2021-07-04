@@ -9,7 +9,7 @@ const mode = process.env.NODE_ENV;
 const serverUrl = process.env.SERVER_URL;
 
 module.exports = (env, options) => {
-  const isDev = mode.trim() !== "production";
+  const isDev = mode !== "production";
 
   let plugins = [
     new Dotenv(),
