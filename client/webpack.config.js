@@ -21,7 +21,9 @@ module.exports = (env, options) => {
     plugins.push(new webpack.HotModuleReplacementPlugin());
     plugins.push(new ReactRefreshWebpackPlugin());
   } else {
-    plugins.push(new Dotenv({ path: path.resolve(__dirname, ".env.netlify") }));
+    plugins.push(
+      new Dotenv({ path: path.resolve(__dirname, "./.env.netlify") })
+    );
   }
 
   return {
