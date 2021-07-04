@@ -5,7 +5,7 @@ const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin"
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
-const mode = process.env.NODE_ENV || "development";
+const mode = process.env.NODE_ENV;
 const serverUrl = process.env.SERVER_URL;
 
 module.exports = (env, options) => {
