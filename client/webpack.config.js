@@ -4,14 +4,12 @@ const webpack = require("webpack");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 //const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
-const CompressionPlugin = require("compression-webpack-plugin");
 
 let mode = process.env.NODE_ENV || "development";
 
 module.exports = (env, options) => {
   let isDev = mode !== "production";
   let plugins = [
-    new CompressionPlugin(),
     new Dotenv(),
     //new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
