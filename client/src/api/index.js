@@ -10,7 +10,7 @@ import {
 
 const mode = process.env.NODE_ENV;
 const serverUrl = process.env.SERVER_URL;
-const localUrl = process.env.LOCAL_URL;
+const localUrl = process.env.LOCAL_URL || "http://localhost:5005";
 let url = mode === "production" ? serverUrl : localUrl;
 
 export const initState = (dispatch) => {
