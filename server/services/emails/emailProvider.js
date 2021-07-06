@@ -24,6 +24,9 @@ const transporter = nodemailer.createTransport({
 
 // verify connection configuration
 transporter.verify((error) => {
+  console.log("emailConfig.port: " + emailConfig.port);
+  console.log("domainUrl: " + domainUrl);
+  console.log("error#########" + error);
   if (error) {
     console.log("error with email connection");
   }
