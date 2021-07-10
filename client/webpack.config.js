@@ -15,6 +15,7 @@ module.exports = (env, options) => {
       process.env.NODE_ENV,
       process.env.LOCAL_URL,
       isDev,
+      mode,
     ],
   });
 
@@ -91,6 +92,8 @@ module.exports = (env, options) => {
       historyApiFallback: {
         disableDotRule: true,
       },
+      port: 3000,
+      open: "Chrome",
     },
   };
 };

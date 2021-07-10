@@ -1,6 +1,8 @@
 const express = require("express");
 const userRoutes = require("./user.route");
 const authRoutes = require("./auth.route");
+const campaignRoutes = require("./campaign.route");
+const categoryRoutes = require("./category.route");
 
 const router = express.Router();
 
@@ -16,5 +18,7 @@ router.use("/docs", express.static("docs"));
 
 router.use("/users", userRoutes);
 router.use("/auth", authRoutes);
+router.use("/campaigns", campaignRoutes);
+router.use("/categories", categoryRoutes);
 
 module.exports = router;

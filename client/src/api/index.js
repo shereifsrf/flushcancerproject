@@ -24,7 +24,7 @@ export const autoAuthenticateUser = (dispatch) => {
   const userObj = user === "undefined" ? undefined : JSON.parse(user);
 
   if (tokenObj && userObj && tokenObj.accessToken && userObj.email) {
-    console.log(tokenObj.refreshToken, userObj.email);
+    // console.log(tokenObj.refreshToken, userObj.email);
     refreshToken(
       { email: userObj.email, refreshToken: tokenObj.refreshToken },
       dispatch
