@@ -2,18 +2,13 @@
 
 Step 1:
 
-
-cd client
-
-npm install
-
-npm run build
+```cd server```
+```npm install```
+```npm start```
 
 step 2:
 
- cd ../server
- 
- npm install
- 
- npm run build
+ ```cd ../client```
+ ```npm install```
+ ```npm start```
  
