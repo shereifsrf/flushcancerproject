@@ -1,4 +1,5 @@
 const httpStatus = require("http-status");
+const { isUndefined } = require("lodash");
 const passport = require("passport");
 const {
     ADMINACCESS,
@@ -6,11 +7,10 @@ const {
     PUBLICACCESS,
     ROLES,
     ADMIN,
+    LOGGED_USER,
 } = require("../config/constants");
 const User = require("../models/user.model");
 const APIError = require("../utils/APIError");
-
-const LOGGED_USER = "_loggedUser";
 
 const handleJWT = (req, res, next, roles) => async (err, user, info) => {
     const error = err || info;
@@ -29,10 +29,43 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
     }
 
     if (roles === LOGGED_USER) {
-        if (user.role !== ADMIN && req.params.userId !== user._id.toString()) {
-            apiError.status = httpStatus.FORBIDDEN;
-            apiError.message = "No admin access";
-            return next(apiError);
+        //here the chunk of validation is nothing to worry
+        //check whether the user requesting an ADMIN
+        //if not check whether user passing userId
+        //in params
+        //in body
+        //in campaigns
+        //in like
+        //in comment
+        //in rating
+        //depending on the validation, if requester want changes to other user data, the role should be ADMIN
+        if (user.role !== ADMIN) {
+            if (
+                (!isUndefined(req.params.userId) &&
+                    req.params.userId !== user._id.toString()) ||
+                (!isUndefined(req.body.userId) &&
+                    req.body.userId !== user._id.toString()) ||
+                (!isUndefined(req.locals) &&
+                    ((!isUndefined(req.locals.campaign) &&
+                        req.locals.campaign.userId.toString() !==
+                            user._id.toString()) ||
+                        (!isUndefined(req.locals.campaignLike) &&
+                            req.locals.campaignLike.userId.toString() !==
+                                user._id.toString()) ||
+                        (!isUndefined(req.locals.campaignComment) &&
+                            req.locals.campaignComment.userId.toString() !==
+                                user._id.toString()) ||
+                        (!isUndefined(req.locals.campaignRating) &&
+                            req.locals.campaignRating.userId.toString() !==
+                                user._id.toString()) ||
+                        (!isUndefined(req.locals.campaignReporting) &&
+                            req.locals.campaignReporting.userId.toString() !==
+                                user._id.toString())))
+            ) {
+                apiError.status = httpStatus.FORBIDDEN;
+                apiError.message = "No admin access";
+                return next(apiError);
+            }
         }
     } else if (!roles.includes(user.role)) {
         apiError.status = httpStatus.FORBIDDEN;

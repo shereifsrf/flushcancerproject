@@ -1,45 +1,24 @@
-const { isNil, omitBy } = require("lodash");
 const mongoose = require("mongoose");
+const { isNil, omitBy } = require("lodash");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
 
-/**
- * Campaign Schema
- * @private
- */
-const campaignSchema = new mongoose.Schema(
+const campaignRatingSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        categoryId: {
+        campaignId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Category",
+            ref: "Campaign",
             required: true,
         },
-        name: {
-            type: String,
+        star: {
+            type: Number,
             required: true,
-            trim: true,
-        },
-        description: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        document: {
-            data: Buffer,
-            contentType: String,
-        },
-        isVerified: {
-            type: Boolean,
-            default: false,
-        },
-        limit: {
-            type: mongoose.Schema.Types.Decimal128,
-            required: true,
+            max: [5, "Must be at most 5, got {VALUE}"],
         },
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -59,21 +38,22 @@ const campaignSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+campaignRatingSchema.index({ userId: 1, campaignId: 1 }, { unique: true });
 
-campaignSchema.statics = {
+campaignRatingSchema.statics = {
     async get(id) {
         try {
-            let campaign;
+            let campaignRating;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                campaign = await this.findById(id).exec();
+                campaignRating = await this.findById(id).exec();
             }
-            if (campaign) {
-                return campaign;
+            if (campaignRating) {
+                return campaignRating;
             }
 
             throw new APIError({
-                message: "Campaign does not exist",
+                message: "CampaignRating does not exist",
                 status: httpStatus.NOT_FOUND,
             });
         } catch (error) {
@@ -81,27 +61,12 @@ campaignSchema.statics = {
         }
     },
 
-    list({
-        page = 1,
-        perPage = 30,
-        name,
-        userId,
-        categoryId,
-        isVerified,
-        minLimit,
-        maxLimit,
-    }) {
-        const limit =
-            minLimit && maxLimit
-                ? { $gte: minLimit, $lte: maxLimit }
-                : undefined;
+    list({ page = 1, perPage = 30, userId, campaignId, star }) {
         const options = omitBy(
             {
-                name,
                 userId,
-                categoryId,
-                isVerified,
-                limit,
+                campaignId,
+                star,
             },
             isNil
         );
@@ -112,24 +77,39 @@ campaignSchema.statics = {
             .limit(perPage)
             .exec();
     },
+    checkDuplicateInsert(error) {
+        if (error.name === "MongoError" && error.code === 11000) {
+            return new APIError({
+                message: "Validation Error",
+                errors: [
+                    {
+                        field: "user and campaign",
+                        location: "body",
+                        messages: ["already rated"],
+                    },
+                ],
+                status: httpStatus.CONFLICT,
+                isPublic: true,
+                stack: error.stack,
+            });
+        }
+        return error;
+    },
 };
 
-campaignSchema.method({
+campaignRatingSchema.method({
     transform() {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
             "id",
             "userId",
-            "categoryId",
-            "name",
-            "description",
-            "limit",
+            "campaignId",
+            "star",
             "createdAt",
             "updatedAt",
             "createdBy",
             "updatedBy",
-            "isVerified",
             "remarks",
         ];
         // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
@@ -142,5 +122,5 @@ campaignSchema.method({
     },
 });
 
-const Campaign = mongoose.model("Campaign", campaignSchema);
-module.exports = Campaign;
+const CampaignRating = mongoose.model("CampaignRating", campaignRatingSchema);
+module.exports = CampaignRating;

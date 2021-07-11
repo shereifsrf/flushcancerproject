@@ -1,5 +1,9 @@
 const httpStatus = require("http-status");
-const { omit } = require("lodash");
+const { omit, isUndefined } = require("lodash");
+const {
+    ADMIN,
+    ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS,
+} = require("../config/constants");
 const Campaign = require("../models/campaign.model");
 
 /**
@@ -18,7 +22,9 @@ exports.load = async (req, res, next, id) => {
 
 exports.create = async (req, res, next) => {
     try {
-        req.body.userId = req.user._id;
+        if (req.user.role !== ADMIN || isUndefined(req.body.userId))
+            req.body.userId = req.user._id;
+
         req.body.createdBy = req.user._id;
         const campaign = new Campaign(req.body);
         const savedCampaign = await campaign.save();
@@ -41,3 +47,30 @@ exports.list = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.update = (req, res, next) => {
+    const userInCharge = req.user;
+    let campaign = req.locals.campaign;
+    const ommitFields =
+        userInCharge.role !== ADMIN ? ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS : [];
+    const updatedCampaign = omit(req.body, ommitFields);
+    campaign.updatedBy = userInCharge._id;
+
+    Object.assign(campaign, updatedCampaign);
+
+    campaign
+        .save()
+        .then((savedCampaign) => res.json(savedCampaign.transform()))
+        .catch((e) => next(e));
+};
+
+exports.remove = (req, res, next) => {
+    const { campaign } = req.locals;
+
+    campaign
+        .remove()
+        .then(() => res.status(httpStatus.NO_CONTENT).end())
+        .catch((e) => next(e));
+};
+
+exports.get = (req, res) => res.json(req.locals.campaign.transform());

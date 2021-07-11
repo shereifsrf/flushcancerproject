@@ -1,44 +1,18 @@
-const { isNil, omitBy } = require("lodash");
 const mongoose = require("mongoose");
+const { isNil, omitBy } = require("lodash");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
 
-/**
- * Campaign Schema
- * @private
- */
-const campaignSchema = new mongoose.Schema(
+const campaignLikeSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        categoryId: {
+        campaignId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Category",
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        description: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        document: {
-            data: Buffer,
-            contentType: String,
-        },
-        isVerified: {
-            type: Boolean,
-            default: false,
-        },
-        limit: {
-            type: mongoose.Schema.Types.Decimal128,
+            ref: "Campaign",
             required: true,
         },
         updatedBy: {
@@ -50,30 +24,27 @@ const campaignSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        remarks: {
-            type: String,
-            trim: true,
-        },
     },
     {
         timestamps: true,
     }
 );
+campaignLikeSchema.index({ userId: 1, camapignId: 1 }, { unique: true });
 
-campaignSchema.statics = {
+campaignLikeSchema.statics = {
     async get(id) {
         try {
-            let campaign;
+            let campaignLike;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                campaign = await this.findById(id).exec();
+                campaignLike = await this.findById(id).exec();
             }
-            if (campaign) {
-                return campaign;
+            if (campaignLike) {
+                return campaignLike;
             }
 
             throw new APIError({
-                message: "Campaign does not exist",
+                message: "CampaignLike does not exist",
                 status: httpStatus.NOT_FOUND,
             });
         } catch (error) {
@@ -84,24 +55,21 @@ campaignSchema.statics = {
     list({
         page = 1,
         perPage = 30,
-        name,
         userId,
-        categoryId,
-        isVerified,
-        minLimit,
-        maxLimit,
+        campaignId,
+        updatedBy,
+        createdBy,
+        updatedAt,
+        createdAt,
     }) {
-        const limit =
-            minLimit && maxLimit
-                ? { $gte: minLimit, $lte: maxLimit }
-                : undefined;
         const options = omitBy(
             {
-                name,
                 userId,
-                categoryId,
-                isVerified,
-                limit,
+                campaignId,
+                updatedBy,
+                createdBy,
+                updatedAt,
+                createdAt,
             },
             isNil
         );
@@ -112,25 +80,38 @@ campaignSchema.statics = {
             .limit(perPage)
             .exec();
     },
+    checkDuplicateInsert(error) {
+        if (error.name === "MongoError" && error.code === 11000) {
+            return new APIError({
+                message: "Validation Error",
+                errors: [
+                    {
+                        field: "user and campaign",
+                        location: "body",
+                        messages: ["already liked"],
+                    },
+                ],
+                status: httpStatus.CONFLICT,
+                isPublic: true,
+                stack: error.stack,
+            });
+        }
+        return error;
+    },
 };
 
-campaignSchema.method({
+campaignLikeSchema.method({
     transform() {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
             "id",
             "userId",
-            "categoryId",
-            "name",
-            "description",
-            "limit",
+            "campaignId",
             "createdAt",
             "updatedAt",
             "createdBy",
             "updatedBy",
-            "isVerified",
-            "remarks",
         ];
         // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
 
@@ -142,5 +123,5 @@ campaignSchema.method({
     },
 });
 
-const Campaign = mongoose.model("Campaign", campaignSchema);
-module.exports = Campaign;
+const CampaignLike = mongoose.model("CampaignLike", campaignLikeSchema);
+module.exports = CampaignLike;

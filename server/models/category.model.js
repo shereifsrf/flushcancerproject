@@ -1,5 +1,7 @@
 const { omitBy, isNil } = require("lodash");
 const mongoose = require("mongoose");
+const APIError = require("../utils/APIError");
+const httpStatus = require("http-status");
 
 const categorySchema = new mongoose.Schema(
     {
@@ -41,7 +43,7 @@ categorySchema.statics = {
             }
 
             throw new APIError({
-                message: "category does not exist",
+                message: "Category does not exist",
                 status: httpStatus.NOT_FOUND,
             });
         } catch (error) {
@@ -49,11 +51,12 @@ categorySchema.statics = {
         }
     },
 
-    list({ page = 1, perPage = 30, name, createdBy }) {
+    list({ page = 1, perPage = 30, name, createdBy, updatedBy }) {
         const options = omitBy(
             {
                 name,
                 createdBy,
+                updatedBy,
             },
             isNil
         );
@@ -69,6 +72,7 @@ categorySchema.statics = {
 categorySchema.method({
     transform() {
         const transformed = {};
+        // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
             "id",
             "name",
@@ -78,6 +82,7 @@ categorySchema.method({
             "createdBy",
             "updatedBy",
         ];
+        // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
 
         fields.forEach((field) => {
             transformed[field] = this[field];

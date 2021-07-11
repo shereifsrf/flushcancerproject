@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const { omit, isUndefined } = require("lodash");
 const { ADMIN } = require("../config/constants");
-const Category = require("../models/category.model");
+const CampaignComment = require("../models/campaign.comment.model");
 
 /**
  * Load user and append to req.
@@ -9,8 +9,8 @@ const Category = require("../models/category.model");
  */
 exports.load = async (req, res, next, id) => {
     try {
-        const category = await Category.get(id);
-        req.locals = { category };
+        const campaignComment = await CampaignComment.get(id);
+        req.locals = { campaignComment };
         return next();
     } catch (error) {
         return next(error);
@@ -23,23 +23,22 @@ exports.create = async (req, res, next) => {
             req.body.userId = req.user._id;
 
         req.body.createdBy = req.user._id;
-        const category = new Category(req.body);
-        const savedCategory = await category.save();
+        const campaignComment = new CampaignComment(req.body);
+        const savedCampaignComment = await campaignComment.save();
         res.status(httpStatus.CREATED);
-        res.json(savedCategory.transform());
+        res.json(savedCampaignComment.transform());
     } catch (error) {
-        // next(Cam.checkDuplicateEmail(error));
         next(error);
     }
 };
 
 exports.list = async (req, res, next) => {
     try {
-        const categories = await Category.list(req.query);
-        const transformedCategories = categories.map((category) =>
-            category.transform()
+        const campaignComments = await CampaignComment.list(req.query);
+        const transformedCampaignComments = campaignComments.map(
+            (campaignComment) => campaignComment.transform()
         );
-        res.json(transformedCategories);
+        res.json(transformedCampaignComments);
     } catch (error) {
         next(error);
     }
@@ -47,23 +46,26 @@ exports.list = async (req, res, next) => {
 
 exports.update = (req, res, next) => {
     const userInCharge = req.user;
-    let category = req.locals.category;
-    category.updatedBy = userInCharge._id;
-    Object.assign(category, req.body);
+    let campaignComment = req.locals.campaignComment;
+    campaignComment.updatedBy = userInCharge._id;
 
-    category
+    Object.assign(campaignComment, req.body);
+
+    campaignComment
         .save()
-        .then((savedCategory) => res.json(savedCategory.transform()))
+        .then((savedCampaignComment) =>
+            res.json(savedCampaignComment.transform())
+        )
         .catch((e) => next(e));
 };
 
 exports.remove = (req, res, next) => {
-    const { category } = req.locals;
+    const { campaignComment } = req.locals;
 
-    category
+    campaignComment
         .remove()
         .then(() => res.status(httpStatus.NO_CONTENT).end())
         .catch((e) => next(e));
 };
 
-exports.get = (req, res) => res.json(req.locals.category.transform());
+exports.get = (req, res) => res.json(req.locals.campaignComment.transform());

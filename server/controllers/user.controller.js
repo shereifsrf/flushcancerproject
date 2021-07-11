@@ -74,9 +74,9 @@ exports.replace = async (req, res, next) => {
 exports.update = (req, res, next) => {
     const userInCharge = req.user;
     let user = req.locals.user;
-    const ommitRole =
+    const ommitFields =
         userInCharge.role !== ADMIN ? ADMIN_ONLY_REPLACABLE_USER_FDS : [];
-    const updatedUser = omit(req.body, ommitRole);
+    const updatedUser = omit(req.body, ommitFields);
     user.updatedBy = userInCharge._id;
 
     Object.assign(user, updatedUser);
