@@ -18,6 +18,7 @@ import { useHistory } from "react-router-dom";
 import { USER_LOGOUT } from "../../../constants";
 import { useAuthContext } from "../../AuthProvider";
 import { Link as RouterLink } from "react-router-dom";
+import AddIcon from "@material-ui/icons/Add";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -177,6 +178,14 @@ export default function TopNav() {
         <p>Messages</p>
       </MenuItem>
       <MenuItem>
+        <IconButton aria-label="show 4 new mails" color="inherit">
+          <Badge badgeContent={4} color="secondary">
+            <AddIcon />
+          </Badge>
+        </IconButton>
+        <p>Create Campaign</p>
+      </MenuItem>
+      <MenuItem>
         <IconButton aria-label="show 11 new notifications" color="inherit">
           <Badge badgeContent={11} color="secondary">
             <NotificationsIcon />
@@ -197,6 +206,10 @@ export default function TopNav() {
       </MenuItem>
     </Menu>
   );
+
+  const createCampaignButtonOnClick = (e) => {
+    history.push("/campaign");
+  };
 
   return (
     <div>
@@ -230,6 +243,15 @@ export default function TopNav() {
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
+            <IconButton
+              aria-label="show 4 new mails"
+              color="inherit"
+              onClick={createCampaignButtonOnClick}
+            >
+              <Badge color="secondary">
+                <AddIcon />
+              </Badge>
+            </IconButton>
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <MailIcon />

@@ -47,6 +47,11 @@ passport.use("google", strategies.google);
 
 // mount api v1 routes
 app.use("/api/v1", routes);
+app.use("/", (req, res) =>
+    res.send(
+        "Welcome to FCP backend. Contact Shereif for more details via chachushereef@gmail.com for usage"
+    )
+);
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);

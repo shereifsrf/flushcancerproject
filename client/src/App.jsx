@@ -77,6 +77,10 @@ const App = () => {
               <TopNavDash />
               <Campaign />
             </PrivateRoute>
+            <PrivateRoute exact path="/campaign">
+              <TopNavDash />
+              <Campaign />
+            </PrivateRoute>
             <PrivateRoute exact path="/public-campaigns/:campaignId">
               <TopNavDash />
               <CampaignPublic />
