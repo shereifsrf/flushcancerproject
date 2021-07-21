@@ -82,24 +82,10 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
 
 const getAccess = (req, res, next) => (err, user, info) => {
     const error = err || info;
-    const apiError = new APIError({
-        message: error ? error.message : "Something went wrong. Try again",
-        status: httpStatus.INTERNAL_SERVER_ERROR,
-        stack: error ? error.stack : undefined,
-    });
 
-    try {
-        if (user.role === ADMIN) {
-            req.access = ADMINACCESS;
-        } else if (ROLES.includes(user.role)) {
-            req.access = DONORACCESS;
-        } else {
-            req.access = PUBLICACCESS;
-        }
-    } catch (e) {
-        return next(e, apiError);
-    }
-    req.user = user;
+    if (error || !user) req.error = error;
+    else req.user = user;
+
     return next();
 };
 

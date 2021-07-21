@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             defaut: true,
         },
+        rating: {
+            type: Number,
+            required: true,
+            defaut: 0,
+        },
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -94,11 +99,20 @@ userSchema.pre("save", async function save(next) {
 userSchema.method({
     transform() {
         const transformed = {};
-        const fields = ["id", "name", "email", "picture", "role", "createdAt"];
+        const fields = [
+            "id",
+            "name",
+            "rating",
+            "email",
+            "picture",
+            "role",
+            "createdAt",
+        ];
 
         fields.forEach((field) => {
             transformed[field] = this[field];
         });
+        // console.log(transformed["rating"]);
 
         return transformed;
     },

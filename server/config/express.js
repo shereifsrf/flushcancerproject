@@ -13,6 +13,7 @@ const passport = require("passport");
 const error = require("../middlewares/error");
 const routes = require("../routes/v1");
 const strategies = require("./passport");
+
 /**
  * Express instance
  * @public
