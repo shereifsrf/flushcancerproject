@@ -25,11 +25,16 @@ exports.create = async (req, res, next) => {
         if (req.user.role !== ADMIN || isUndefined(req.body.userId))
             req.body.userId = req.user._id;
 
+        req.body.document = {
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+        };
+
         req.body.createdBy = req.user._id;
         const campaign = new Campaign(req.body);
         const savedCampaign = await campaign.save();
         res.status(httpStatus.CREATED);
-        res.json(savedCampaign.transform());
+        res.json(await savedCampaign.transform(req.user));
     } catch (error) {
         // next(Cam.checkDuplicateEmail(error));
         next(error);
@@ -39,8 +44,8 @@ exports.create = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         const campaigns = await Campaign.list(req.query);
-        const transformedCampaigns = campaigns.map((campaign) =>
-            campaign.transform()
+        const transformedCampaigns = await Promise.all(
+            campaigns.map((campaign) => campaign.transform(req.user))
         );
         res.json(transformedCampaigns);
     } catch (error) {
@@ -51,6 +56,12 @@ exports.list = async (req, res, next) => {
 exports.update = (req, res, next) => {
     const userInCharge = req.user;
     let campaign = req.locals.campaign;
+
+    req.body.document = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+    };
+
     const ommitFields =
         userInCharge.role !== ADMIN ? ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS : [];
     const updatedCampaign = omit(req.body, ommitFields);
@@ -60,7 +71,9 @@ exports.update = (req, res, next) => {
 
     campaign
         .save()
-        .then((savedCampaign) => res.json(savedCampaign.transform()))
+        .then(async (savedCampaign) =>
+            res.json(await savedCampaign.transform(req.user))
+        )
         .catch((e) => next(e));
 };
 
@@ -73,4 +86,5 @@ exports.remove = (req, res, next) => {
         .catch((e) => next(e));
 };
 
-exports.get = (req, res) => res.json(req.locals.campaign.transform());
+exports.get = async (req, res) =>
+    res.send(await req.locals.campaign.transform(req.user));

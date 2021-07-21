@@ -1,7 +1,9 @@
-const { isNil, omitBy } = require("lodash");
+const { isNil, omitBy, pick } = require("lodash");
 const mongoose = require("mongoose");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
+const { USER_CAMPAIGN_RATING_THRESHOLD } = require("../config/constants");
+const Category = require("./category.model");
 
 /**
  * Campaign Schema
@@ -50,9 +52,19 @@ const campaignSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
+        expiresAt: {
+            type: Date,
+            required: true,
+            default: Date.now() + 30,
+        },
         remarks: {
             type: String,
             trim: true,
+        },
+        isVerifyDocument: {
+            type: Boolean,
+            required: true,
+            default: true,
         },
     },
     {
@@ -66,9 +78,19 @@ campaignSchema.statics = {
             let campaign;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                campaign = await this.findById(id).exec();
+                campaign = await Campaign.findById(id)
+                    .populate("categoryId")
+                    .exec();
+
+                // const campaign = await Campaign.findById(
+                //     "60ea6a073afc6d5a34e1a193"
+                // )
+                //     .populate("categoryId")
+                //     .exec();
+                // console.log(campaign);
             }
             if (campaign) {
+                // console.log("herer", campaign);
                 return campaign;
             }
 
@@ -115,30 +137,88 @@ campaignSchema.statics = {
 };
 
 campaignSchema.method({
-    transform() {
-        const transformed = {};
-        // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
-        const fields = [
-            "id",
-            "userId",
-            "categoryId",
-            "name",
-            "description",
-            "limit",
-            "createdAt",
-            "updatedAt",
-            "createdBy",
-            "updatedBy",
-            "isVerified",
-            "remarks",
-        ];
-        // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
+    async transform(user) {
+        try {
+            const transformed = {};
+            const fields = [
+                "id",
+                "userId",
+                "categoryId",
+                "name",
+                "description",
+                "document",
+                "limit",
+                "createdAt",
+                "updatedAt",
+                "createdBy",
+                "updatedBy",
+                "isVerified",
+                "remarks",
+                "isVerifyDocument",
+                "editable",
+                "expiresAt",
+            ];
+            // console.log(this);
 
-        fields.forEach((field) => {
-            transformed[field] = this[field];
-        });
+            if (user) {
+                // console.log(this["userId"].toString() === user.id);
+                if (user.id === this["userId"].toString())
+                    this["editable"] = true;
+                if (user.rating >= USER_CAMPAIGN_RATING_THRESHOLD)
+                    this["isVerifyDocument"] = false;
+            }
 
-        return transformed;
+            await Promise.all(
+                fields.map(async (field) => {
+                    switch (field) {
+                        case "limit":
+                            transformed[field] = parseFloat(
+                                this[field].toString()
+                            );
+                            break;
+                        // case "isVerifyDocument":
+                        //     transformed[field] =
+                        //     break;
+                        case "categoryId":
+                            // console.log(this[field]);
+                            if (this[field] && this[field].name) {
+                                console.log("yep");
+                                const category = new Category(this[field]);
+                                const transformedCategory =
+                                    category.transform();
+                                transformed["category"] = pick(
+                                    transformedCategory,
+                                    ["id", "name"]
+                                );
+                            } else if (this[field]) {
+                                const categoryData = await Category.findById(
+                                    this[field]
+                                );
+                                const category = new Category(categoryData);
+                                // console.log(category);
+                                const transformedCategory =
+                                    category.transform();
+                                transformed["category"] = pick(
+                                    transformedCategory,
+                                    ["id", "name"]
+                                );
+                                // console.log("here");
+                            } else {
+                                transformed["category"] = { id: "", name: "" };
+                            }
+                            break;
+                        default:
+                            transformed[field] = this[field] || null;
+                            break;
+                    }
+                })
+            );
+
+            // console.log(transformed);
+            return transformed;
+        } catch (e) {
+            console.log(e);
+        }
     },
 });
 

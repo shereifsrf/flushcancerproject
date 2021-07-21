@@ -4,7 +4,7 @@ const RefreshToken = require("../models/refreshToken.model");
 const PasswordResetToken = require("../models/passwordResetToken.model");
 const moment = require("moment-timezone");
 const { jwtExpirationInterval } = require("../config/vars");
-const { omit } = require("lodash");
+const { omit, isEmpty } = require("lodash");
 const APIError = require("../utils/APIError");
 const emailProvider = require("../services/emails/emailProvider");
 
@@ -209,4 +209,26 @@ exports.resetPassword = async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
+};
+
+exports.verifyToken = (req, res, next) => {
+    const apiError = new APIError({
+        message: req.error
+            ? req.error.message
+            : "Something went wrong. Try again",
+        status: httpStatus.INTERNAL_SERVER_ERROR,
+        stack: req.error ? req.error.stack : undefined,
+    });
+
+    if (!req.body) {
+        apiError.message = `no "email" found`;
+        apiError.status = httpStatus.NOT_FOUND;
+        return req.next(apiError);
+    } else if (req.user && req.body.email) {
+        if (req.user.email !== req.body.email) {
+            apiError.message = `"email" does not match`;
+            apiError.status = httpStatus.NOT_FOUND;
+            return req.next(apiError);
+        } else return res.status(httpStatus.OK).send(true);
+    } else return req.next(apiError);
 };
