@@ -10,19 +10,19 @@ import Collapse from "@material-ui/core/Collapse";
 import Avatar from "@material-ui/core/Avatar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import { red } from "@material-ui/core/colors";
+import { red, green } from "@material-ui/core/colors";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { limitCharWithDots } from "../../../util";
-import { Grid, Divider, LinearProgress, Box } from "@material-ui/core";
+import { LinearProgress, Box } from "@material-ui/core";
 import { Link, useRouteMatch } from "react-router-dom";
 import { useLayoutEffect } from "react";
-import { campaigns } from "../../../dummyData";
 import { isEmpty } from "lodash";
 import { Buffer } from "buffer";
-import { PUBLIC_CAMPAIGNS } from "../../../constants";
+import { PUBLIC_CAMPAIGNS, CAMPAIGNS_URL } from "../../../constants";
+import LockIcon from "@material-ui/icons/Lock";
+import VerifiedUserIcon from "@material-ui/icons/VerifiedUser";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -47,8 +47,11 @@ const useStyles = makeStyles((theme) => ({
     expandOpen: {
         transform: "rotate(180deg)",
     },
-    avatar: {
+    red: {
         backgroundColor: red[500],
+    },
+    green: {
+        backgroundColor: green[500],
     },
     desc: {
         maxHeight: 100,
@@ -64,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function CampaignCard({ campaign }) {
+export default function CampaignCard({ campaign, dashboard }) {
     // console.log(campaign);
     const { url, path } = useRouteMatch();
     const [imgSrc, setImgSrc] = useState("");
@@ -90,13 +93,26 @@ export default function CampaignCard({ campaign }) {
         <Card key={campaign.id} className={classes.card}>
             {/* <Link to={`${url}/${campaign.id}`} className={classes.link}> */}
             <Link
-                to={`${PUBLIC_CAMPAIGNS}/${campaign.id}`}
+                to={`${dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS}/${
+                    campaign.id
+                }`}
                 className={classes.link}
             >
                 <CardHeader
                     avatar={
-                        <Avatar aria-label="recipe" className={classes.avatar}>
-                            R
+                        <Avatar
+                            aria-label="recipe"
+                            className={
+                                campaign.isVerified
+                                    ? classes.green
+                                    : classes.red
+                            }
+                        >
+                            {campaign.isVerified ? (
+                                <VerifiedUserIcon />
+                            ) : (
+                                <LockIcon />
+                            )}
                         </Avatar>
                     }
                     // action={

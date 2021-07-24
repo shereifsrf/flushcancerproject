@@ -37,6 +37,7 @@ const campaignSchema = new mongoose.Schema(
         },
         isVerified: {
             type: Boolean,
+            required: true,
             default: false,
         },
         limit: {
@@ -206,6 +207,9 @@ campaignSchema.method({
                             } else {
                                 transformed["category"] = { id: "", name: "" };
                             }
+                            break;
+                        case "isVerified":
+                            transformed[field] = this[field];
                             break;
                         default:
                             transformed[field] = this[field] || null;

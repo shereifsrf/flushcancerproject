@@ -73,7 +73,7 @@ const Login = () => {
     }, []);
 
     useEffect(() => {
-        console.log(status);
+        // console.log(status);
         if (state.isAuthenticated) history.replace(redirectTo.current);
         else if (status.autoAuthenticateUserFailed) {
             if (!alert.open) {

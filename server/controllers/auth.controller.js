@@ -229,6 +229,6 @@ exports.verifyToken = (req, res, next) => {
             apiError.message = `"email" does not match`;
             apiError.status = httpStatus.NOT_FOUND;
             return req.next(apiError);
-        } else return res.status(httpStatus.OK).send(true);
+        } else return res.status(httpStatus.OK).send(req.user.transform());
     } else return req.next(apiError);
 };

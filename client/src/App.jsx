@@ -20,6 +20,7 @@ import {
 import ActionProvider from "./components/general/ActionContext";
 import AuthProvider, { useAuthContext } from "./components/AuthProvider";
 import UserVerification from "./components/general/userVerification/UserVerification";
+import { CAMPAIGNS_URL, DASHBOARD_URL, PUBLIC_CAMPAIGNS } from "./constants";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -68,7 +69,7 @@ const App = () => {
                         <Route exact path="/user-verify/:refreshToken">
                             <UserVerification />
                         </Route>
-                        <PrivateRoute exact path="/home">
+                        <PrivateRoute exact path={`/${DASHBOARD_URL}`}>
                             <TopNavDash />
                             <MainDash />
                         </PrivateRoute>
@@ -76,24 +77,27 @@ const App = () => {
                             <TopNavDash />
                             <Profile />
                         </PrivateRoute>
-                        <PrivateRoute exact path="/campaigns/:campaignId">
+                        <PrivateRoute
+                            exact
+                            path={`/${CAMPAIGNS_URL}/:campaignId`}
+                        >
                             <TopNavDash />
                             <Campaign />
                         </PrivateRoute>
-                        <PrivateRoute exact path="/campaigns">
+                        <PrivateRoute exact path={`/${CAMPAIGNS_URL}`}>
                             <TopNavDash />
                             <Campaign />
                         </PrivateRoute>
                         <PrivateRoute
                             exact
-                            path="/public-campaigns/:campaignId"
+                            path={`/${PUBLIC_CAMPAIGNS}/:campaignId`}
                         >
                             <TopNavDash />
                             <CampaignPublic />
                         </PrivateRoute>
-                        <PrivateRoute exact path="/public-campaigns">
+                        <PrivateRoute exact path={`/${PUBLIC_CAMPAIGNS}`}>
                             <TopNavDash />
-                            <CampaignList />
+                            <CampaignList dashboard={false} />
                         </PrivateRoute>
                     </Switch>
                     <Footer />
