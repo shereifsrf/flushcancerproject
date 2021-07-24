@@ -474,6 +474,7 @@ export default function Campaign() {
                                         name="description"
                                         fullWidth
                                         multiline
+                                        rows={4}
                                         rowsMax={10}
                                         value={data.description}
                                         variant="outlined"

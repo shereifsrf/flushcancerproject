@@ -60,6 +60,9 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
                                 user._id.toString()) ||
                         (!isUndefined(req.locals.campaignReporting) &&
                             req.locals.campaignReporting.userId.toString() !==
+                                user._id.toString()) ||
+                        (!isUndefined(req.locals.donation) &&
+                            req.locals.donation.userId.toString() !==
                                 user._id.toString())))
             ) {
                 apiError.status = httpStatus.FORBIDDEN;

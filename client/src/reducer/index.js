@@ -28,6 +28,9 @@ import {
     DELETE_CAMPAIGN_IN_PROGRESS,
     DELETE_CAMPAIGN_SUCCESS,
     DELETE_CAMPAIGN_FAILED,
+    CREATE_DONATION_IN_PROGRESS,
+    CREATE_DONATION_SUCCESS,
+    CREATE_DONATION_FAILED,
 } from "../constants";
 
 export const initialState = {
@@ -39,6 +42,7 @@ export const initialState = {
     status: {
         ...clearCampaignStatus,
         ...clearAuthStatus,
+        ...clearDonationStatus,
         getCategoryListSuccess: false,
         getCategoryListFailed: false,
         getCategoryListInProgress: false,
@@ -364,6 +368,44 @@ export const reducer = (state, action) => {
                     deleteCampaignInProgress: true,
                 },
             };
+
+        case CREATE_DONATION_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                donation: data,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    ...clearDonationStatus,
+                    createDonationSuccess: true,
+                },
+            };
+
+        case CREATE_DONATION_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    ...clearDonationStatus,
+                    createDonationInProgress: true,
+                },
+            };
+
+        case CREATE_DONATION_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    ...clearDonationStatus,
+                    createDonationFailed: true,
+                },
+            };
         default:
             return state;
     }
@@ -385,6 +427,12 @@ const clearCampaignStatus = {
     deleteCampaignSuccess: false,
     deleteCampaignFailed: false,
     deleteCampaignInProgress: false,
+};
+
+const clearDonationStatus = {
+    createDonationSuccess: false,
+    createDonationFailed: false,
+    createDonationInProgress: false,
 };
 
 const clearError = {
