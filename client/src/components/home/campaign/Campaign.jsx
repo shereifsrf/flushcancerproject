@@ -31,7 +31,7 @@ import {
     getCategoryList,
     updateCampaign,
     createCampaign,
-} from "Api";
+} from "../../../api";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useLayoutEffect } from "react";
 import { Buffer } from "buffer";
@@ -82,6 +82,7 @@ const initAlert = {
     title: "",
     contentText: "",
     buttonText: "",
+    buttonFn: undefined,
 };
 
 const getOtherOptions = (isEditable, element) => {
@@ -150,6 +151,7 @@ export default function Campaign() {
                     title: "Campaign Created",
                     contentText: `Campaign '${state.campaign.name}' successfully created `,
                     buttonText: "Great",
+                    buttonFn: () => history.push(`/${DASHBOARD_URL}`),
                 });
             } else if (state.status.updateCampaignSuccess) {
                 setAlert({
@@ -191,11 +193,7 @@ export default function Campaign() {
 
     useEffect(() => {
         if (!isEditable()) {
-            if (
-                status.getCampaignSuccess ||
-                status.createCampaignSuccess ||
-                status.updateCampaignSuccess
-            ) {
+            if (status.getCampaignSuccess || status.updateCampaignSuccess) {
                 const campaign = state.campaign;
                 const document = campaign.document || null;
                 const category = campaign.category || {
@@ -558,7 +556,7 @@ export default function Campaign() {
                             title={alert.title}
                             contentText={alert.contentText}
                             buttonText={alert.buttonText}
-                            buttonFn={handleAlertOpen}
+                            buttonFn={alert.buttonFn || handleAlertOpen}
                         />
                     </>
                 )}

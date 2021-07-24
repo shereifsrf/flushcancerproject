@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import CampaignCard from "./CampaignCard";
-import { getCampaignList } from "Api";
+import { getCampaignList } from "../../../api";
 import { useAuthContext } from "../../AuthProvider";
 import { isEmpty } from "lodash";
 
@@ -22,14 +22,14 @@ const useStyles = makeStyles((theme) => ({
 
 const initState = [];
 
-export default function CampaignList() {
+export default function CampaignList(props) {
     const classes = useStyles();
     const [campaigns, setCampaigns] = useState(initState);
     const { state, dispatch } = useAuthContext();
     const status = state.status;
 
     useLayoutEffect(() => {
-        getCampaignList(dispatch);
+        getCampaignList(props.dashboard || false, dispatch);
     }, []);
 
     useEffect(() => {
@@ -91,9 +91,12 @@ export default function CampaignList() {
                                         key={campaign.id}
                                         sm={6}
                                         md={4}
-                                        lg={3}
+                                        lg={4}
                                     >
-                                        <CampaignCard campaign={campaign} />
+                                        <CampaignCard
+                                            campaign={campaign}
+                                            dashboard={props.dashboard}
+                                        />
                                     </Grid>
                                 );
                             })}

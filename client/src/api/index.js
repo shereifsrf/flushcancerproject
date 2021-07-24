@@ -40,7 +40,7 @@ export const initState = (dispatch) => {
     dispatch({ type: INITIAL });
 };
 
-const GetLocalStorage = () => {
+const getLocalStorage = () => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
     const tokenObj = isEmpty(token) ? undefined : JSON.parse(token);
@@ -49,10 +49,18 @@ const GetLocalStorage = () => {
     return { token: tokenObj, user: userObj };
 };
 
+const setLocalStorage = (localStorageItems) => {
+    if (localStorageItems) {
+        localStorage.setItem("user", JSON.stringify(localStorageItems.user));
+        localStorage.setItem("token", JSON.stringify(localStorageItems.token));
+        return true;
+    }
+    return false;
+};
+
 export const autoAuthenticateUser = async (dispatch) => {
     dispatch({ type: AUTO_AUTHENTICATE_USER_IN_PROGRESS });
-    const localStorageItems = GetLocalStorage();
-    // console.log(localStorageItems.user.email);
+    const localStorageItems = getLocalStorage();
     try {
         if (localStorageItems.token && localStorageItems.user) {
             const result = await instance.post(
@@ -66,10 +74,17 @@ export const autoAuthenticateUser = async (dispatch) => {
             );
 
             if (result.status === 200) {
-                // console.log(localStorageItems);
+                // console.log(result.data);
+                const payload = {
+                    user: result.data,
+                    token: localStorageItems.token,
+                };
+
+                setLocalStorage(payload);
+                // console.log(payload);
                 return dispatch({
                     type: AUTO_AUTHENTICATE_USER_SUCCESS,
-                    payload: localStorageItems,
+                    payload,
                 });
             }
         }
@@ -93,9 +108,16 @@ const refreshToken = (localStorageItems, dispatch) => {
         })
         .then((res) => {
             if (res.status === 200) {
+                const payload = {
+                    token: res.data,
+                    user: localStorageItems.user,
+                };
+
+                setLocalStorage(payload);
+
                 dispatch({
                     type: AUTO_AUTHENTICATE_USER_SUCCESS,
-                    payload: res.data,
+                    payload,
                 });
             }
         })
@@ -115,24 +137,7 @@ export const userVerify = (data, dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-
-            dispatch({
-                type: USER_LOGIN_FAILED,
-                payload: { status: err.status, message: msg },
-            });
-            return {};
+            return handleFailure(error, USER_LOGIN_FAILED, dispatch);
         });
 };
 
@@ -156,8 +161,8 @@ export const userLogin = (data, dispatch) => {
 };
 
 export const userRegister = (data, dispatch) => {
-    axios
-        .post(`${url}/api/v1/auth/register`, {
+    instance
+        .post(`auth/register`, {
             name: data.name,
             email: data.email,
             password: data.password,
@@ -171,30 +176,7 @@ export const userRegister = (data, dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.errors) {
-                    if (Array.isArray(err.data.errors)) {
-                        if (Array.isArray(err.data.errors[0].messages))
-                            msg = err.data.errors[0].messages[0];
-                    } else {
-                        msg = err.data.message;
-                    }
-                } else if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            dispatch({
-                type: USER_REGISTRATION_FAILED,
-                payload: { status: err.status, message: msg },
-            });
-            return {};
+            return handleFailure(error, USER_REGISTRATION_FAILED, dispatch);
         });
 };
 
@@ -204,7 +186,7 @@ export const getCampaign = (campaignId, dispatch) => {
     instance
         .get(`campaigns/${campaignId}`, {
             headers: {
-                Authorization: `Bearer ${GetLocalStorage().token.accessToken}`,
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
             },
         })
         .then((res) => {
@@ -217,31 +199,18 @@ export const getCampaign = (campaignId, dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            return dispatch({
-                type: GET_CAMPAIGN_FAILED,
-                payload: { status: err.status, message: msg },
-            });
+            return handleFailure(error, GET_CAMPAIGN_FAILED, dispatch);
         });
 };
 
 export const getCategoryList = (dispatch) => {
     dispatch({ type: GET_CATEGORY_LIST_IN_PROGRESS });
 
-    axios
-        .get(`${url}/api/v1/categories`, {
-            headers: { Authorization: `Bearer ${getAccessToken()}` },
+    instance
+        .get(`categories`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
         })
         .then((res) => {
             if (res.status === 200) {
@@ -253,22 +222,7 @@ export const getCategoryList = (dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            return dispatch({
-                type: GET_CATEGORY_LIST_FAILED,
-                payload: { status: err.status, message: msg },
-            });
+            return handleFailure(error, GET_CATEGORY_LIST_FAILED, dispatch);
         });
 };
 
@@ -283,9 +237,11 @@ export const updateCampaign = (campaignId, data, dispatch) => {
 
     if (data.imageChanged) formData.append("document", data.document);
 
-    axios
-        .patch(`${url}/api/v1/campaigns/${campaignId}`, formData, {
-            headers: { Authorization: `Bearer ${getAccessToken()}` },
+    instance
+        .patch(`campaigns/${campaignId}`, formData, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
         })
         .then((res) => {
             if (res.status === 200) {
@@ -296,30 +252,7 @@ export const updateCampaign = (campaignId, data, dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.errors) {
-                    if (Array.isArray(err.data.errors)) {
-                        if (Array.isArray(err.data.errors[0].messages))
-                            msg = err.data.errors[0].messages[0];
-                    } else {
-                        msg = err.data.message;
-                    }
-                } else if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            dispatch({
-                type: UPDATE_CAMPAIGN_FAILED,
-                payload: { status: err.status, message: msg },
-            });
-            return {};
+            return handleFailure(error, UPDATE_CAMPAIGN_FAILED, dispatch);
         });
 };
 
@@ -334,9 +267,11 @@ export const createCampaign = (data, dispatch) => {
 
     if (data.imageChanged) formData.append("document", data.document);
 
-    axios
-        .post(`${url}/api/v1/campaigns`, formData, {
-            headers: { Authorization: `Bearer ${getAccessToken()}` },
+    instance
+        .post(`campaigns`, formData, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
         })
         .then((res) => {
             // if (res.status === 200) {
@@ -347,40 +282,20 @@ export const createCampaign = (data, dispatch) => {
             // }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.errors) {
-                    if (Array.isArray(err.data.errors)) {
-                        if (Array.isArray(err.data.errors[0].messages))
-                            msg = err.data.errors[0].messages[0];
-                    } else {
-                        msg = err.data.message;
-                    }
-                } else if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            dispatch({
-                type: CREATE_CAMPAIGN_FAILED,
-                payload: { status: err.status, message: msg },
-            });
-            return {};
+            return handleFailure(error, CREATE_CAMPAIGN_FAILED, dispatch);
         });
 };
 
-export const getCampaignList = (dispatch) => {
+export const getCampaignList = (dashboard, dispatch) => {
     dispatch({ type: GET_CAMPAIGN_LIST_IN_PROGRESS });
 
     instance
         .get(`campaigns`, {
+            params: {
+                dashboard,
+            },
             headers: {
-                Authorization: `Bearer ${GetLocalStorage().token.accessToken}`,
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
             },
         })
         .then((res) => {
@@ -393,22 +308,7 @@ export const getCampaignList = (dispatch) => {
             }
         })
         .catch((error) => {
-            let err = error.response || {};
-            //TODO: even status is OK, this code still runs, check why
-            let msg = "Error Encountered";
-            if (err.data) {
-                if (err.data.message) {
-                    if (Array.isArray(err.data.message)) {
-                        msg = err.data.message[0].message;
-                    } else {
-                        msg = err.data.message;
-                    }
-                }
-            }
-            return dispatch({
-                type: GET_CAMPAIGN_LIST_FAILED,
-                payload: { status: err.status, message: msg },
-            });
+            return handleFailure(error, GET_CAMPAIGN_LIST_FAILED, dispatch);
         });
 };
 

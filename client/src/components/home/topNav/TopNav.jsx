@@ -15,10 +15,16 @@ import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import { useHistory } from "react-router-dom";
-import { CAMPAIGNS_URL, USER_LOGOUT } from "../../../constants";
+import {
+    CAMPAIGNS_URL,
+    DASHBOARD_URL,
+    PUBLIC_CAMPAIGNS,
+    USER_LOGOUT,
+} from "../../../constants";
 import { useAuthContext } from "../../AuthProvider";
 import { Link as RouterLink } from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
+import PublicIcon from "@material-ui/icons/Public";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -139,10 +145,10 @@ export default function TopNav() {
             <MenuItem
                 onClick={() => {
                     handleMenuClose();
-                    history.push("/home");
+                    history.push(`${DASHBOARD_URL}`);
                 }}
             >
-                My Campaigns
+                Dashboard
             </MenuItem>
             <MenuItem
                 onClick={() => {
@@ -210,10 +216,6 @@ export default function TopNav() {
         </Menu>
     );
 
-    const createCampaignButtonOnClick = (e) => {
-        history.push(`/${CAMPAIGNS_URL}`);
-    };
-
     return (
         <div>
             <AppBar position="static" className={classes.grow}>
@@ -246,31 +248,39 @@ export default function TopNav() {
                     </div>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
-                        <IconButton
-                            aria-label="show 4 new mails"
-                            color="inherit"
-                            onClick={createCampaignButtonOnClick}
-                        >
-                            <Badge color="secondary">
-                                <AddIcon />
-                            </Badge>
-                        </IconButton>
                         {/* <IconButton
                             aria-label="show 4 new mails"
                             color="inherit"
-                        >
+                            >
                             <Badge badgeContent={4} color="secondary">
-                                <MailIcon />
+                            <MailIcon />
                             </Badge>
-                        </IconButton>
-                        <IconButton
+                            </IconButton>
+                            <IconButton
                             aria-label="show 17 new notifications"
                             color="inherit"
-                        >
+                            >
                             <Badge badgeContent={17} color="secondary">
-                                <NotificationsIcon />
+                            <NotificationsIcon />
                             </Badge>
                         </IconButton> */}
+                        <IconButton
+                            edge="end"
+                            aria-label="account of current user"
+                            aria-controls={menuId}
+                            aria-haspopup="true"
+                            onClick={() => history.push(`${PUBLIC_CAMPAIGNS}`)}
+                            color="inherit"
+                        >
+                            <PublicIcon />
+                        </IconButton>
+                        <IconButton
+                            color="inherit"
+                            onClick={() => history.push(`/${CAMPAIGNS_URL}`)}
+                        >
+                            <AddIcon />
+                        </IconButton>
+
                         <IconButton
                             edge="end"
                             aria-label="account of current user"

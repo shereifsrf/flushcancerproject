@@ -36,5 +36,9 @@ export const GET_CAMPAIGN_LIST_IN_PROGRESS = "GET_CAMPAIGN_LIST_IN_PROGRESS";
 export const INITIAL = "INITIAL";
 
 export const CAMPAIGNS_URL = "campaigns";
-export const DASHBOARD_URL = "home";
+export const DASHBOARD_URL = "dashboard";
 export const PUBLIC_CAMPAIGNS = "public-campaigns";
+
+export const USER_ROLE_DONOR = "DONOR";
+export const USER_ROLE_CAMPAIGNER = "CAMPAIGNER";
+export const USER_ROLE_ADMIN = "ADMIN";
