@@ -161,7 +161,7 @@ export default function Campaign() {
                 setAlert({
                     open: true,
                     title: "Campaign Deleted",
-                    contentText: `Campaign '${state.campaign.name}' successfully created `,
+                    contentText: `Campaign '${state.campaign.name}' successfully deleted `,
                     buttonText: "Great",
                     buttonFn: () => history.replace(`/${DASHBOARD_URL}`),
                 });
