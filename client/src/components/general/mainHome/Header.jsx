@@ -68,7 +68,7 @@ export default function Header() {
                         Flush<span className={classes.colorText}>Cancer</span>
                     </h1>
                     <Button
-                        onClick={() => history.push(`/${DASHBOARD_URL}`)}
+                        onClick={() => history.replace(`/${DASHBOARD_URL}`)}
                         color="inherit"
                         className={classes.icon}
                         variant="outlined"

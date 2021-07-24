@@ -28,6 +28,7 @@ import { useRef } from "react";
 import AlertDialog from "../AlertDialog";
 import { useLayoutEffect } from "react";
 import { autoAuthenticateUser, userLogin, userRegister } from "../../../api";
+import { DASHBOARD_URL } from "../../../constants";
 
 const initData = {
     email: "",
@@ -61,7 +62,9 @@ const Login = () => {
     const { isSignUp } = useActionContext();
     const { state, dispatch } = useAuthContext();
     const [data, setData] = useState(initData);
-    const { from } = location.state || { from: { pathname: "/home" } };
+    const { from } = location.state || {
+        from: { pathname: `/${DASHBOARD_URL}` },
+    };
     const redirectTo = useRef(from);
 
     const status = state.status;

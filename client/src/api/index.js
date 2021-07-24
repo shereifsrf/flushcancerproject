@@ -25,6 +25,9 @@ import {
     AUTO_AUTHENTICATE_USER_FAILED,
     AUTO_AUTHENTICATE_USER_IN_PROGRESS,
     AUTO_AUTHENTICATE_USER_FAILED_NO_LOCALS,
+    DELETE_CAMPAIGN_IN_PROGRESS,
+    DELETE_CAMPAIGN_SUCCESS,
+    DELETE_CAMPAIGN_FAILED,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -200,6 +203,29 @@ export const getCampaign = (campaignId, dispatch) => {
         })
         .catch((error) => {
             return handleFailure(error, GET_CAMPAIGN_FAILED, dispatch);
+        });
+};
+
+export const deleteCampaign = (campaignId, dispatch) => {
+    dispatch({ type: DELETE_CAMPAIGN_IN_PROGRESS });
+
+    instance
+        .delete(`campaigns/${campaignId}`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            if (res.status === 200) {
+                // console.log(res.data.document);
+                return dispatch({
+                    type: DELETE_CAMPAIGN_SUCCESS,
+                    payload: res.data,
+                });
+            }
+        })
+        .catch((error) => {
+            return handleFailure(error, DELETE_CAMPAIGN_FAILED, dispatch);
         });
 };
 

@@ -110,6 +110,10 @@ export default function TopNav() {
         setAnchorEl(event.currentTarget);
     };
 
+    const handlePublicCampaign = () => history.replace(`/${PUBLIC_CAMPAIGNS}`);
+
+    const handleCreateCampaign = () => history.replace(`/${CAMPAIGNS_URL}`);
+
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
     };
@@ -137,7 +141,7 @@ export default function TopNav() {
             <MenuItem
                 onClick={() => {
                     handleMenuClose();
-                    history.push("/profile");
+                    history.replace("/profile");
                 }}
             >
                 Profile
@@ -145,7 +149,7 @@ export default function TopNav() {
             <MenuItem
                 onClick={() => {
                     handleMenuClose();
-                    history.push(`${DASHBOARD_URL}`);
+                    history.replace(`/${DASHBOARD_URL}`);
                 }}
             >
                 Dashboard
@@ -156,7 +160,7 @@ export default function TopNav() {
                     dispatch({
                         type: USER_LOGOUT,
                     });
-                    history.push("/");
+                    history.replace("/");
                 }}
             >
                 Logout
@@ -175,32 +179,24 @@ export default function TopNav() {
             open={isMobileMenuOpen}
             onClose={handleMobileMenuClose}
         >
-            <MenuItem>
+            <MenuItem onClick={handlePublicCampaign}>
                 <IconButton aria-label="show 4 new mails" color="inherit">
-                    <Badge badgeContent={4} color="secondary">
-                        <MailIcon />
-                    </Badge>
+                    {/* <Badge badgeContent={4} color="secondary"> */}
+                    <PublicIcon />
+                    {/* </Badge> */}
                 </IconButton>
-                <p>Messages</p>
+                <p>Public Campaigns</p>
             </MenuItem>
-            <MenuItem>
-                <IconButton aria-label="show 4 new mails" color="inherit">
-                    <Badge badgeContent={4} color="secondary">
-                        <AddIcon />
-                    </Badge>
-                </IconButton>
-                <p>Create Campaign</p>
-            </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={handleCreateCampaign}>
                 <IconButton
-                    aria-label="show 11 new notifications"
+                    aria-label="account of current user"
+                    aria-controls="primary-search-account-menu"
+                    aria-haspopup="true"
                     color="inherit"
                 >
-                    <Badge badgeContent={11} color="secondary">
-                        <NotificationsIcon />
-                    </Badge>
+                    <AddIcon />
                 </IconButton>
-                <p>Notifications</p>
+                <p>Create Campaign</p>
             </MenuItem>
             <MenuItem onClick={handleProfileMenuOpen}>
                 <IconButton
@@ -269,14 +265,14 @@ export default function TopNav() {
                             aria-label="account of current user"
                             aria-controls={menuId}
                             aria-haspopup="true"
-                            onClick={() => history.push(`${PUBLIC_CAMPAIGNS}`)}
+                            onClick={handlePublicCampaign}
                             color="inherit"
                         >
                             <PublicIcon />
                         </IconButton>
                         <IconButton
                             color="inherit"
-                            onClick={() => history.push(`/${CAMPAIGNS_URL}`)}
+                            onClick={handleCreateCampaign}
                         >
                             <AddIcon />
                         </IconButton>

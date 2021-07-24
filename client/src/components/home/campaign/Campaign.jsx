@@ -15,6 +15,7 @@ import {
     Box,
     MenuItem,
     Select,
+    IconButton,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CloudUpload, Tune } from "@material-ui/icons";
@@ -31,6 +32,7 @@ import {
     getCategoryList,
     updateCampaign,
     createCampaign,
+    deleteCampaign,
 } from "../../../api";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useLayoutEffect } from "react";
@@ -38,6 +40,7 @@ import { Buffer } from "buffer";
 import { useRef } from "react";
 import { CAMPAIGNS_URL, DASHBOARD_URL } from "../../../constants";
 import AlertDialog from "../../general/AlertDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const useStyles = makeStyles((theme) => ({
     divider: {
@@ -83,6 +86,7 @@ const initAlert = {
     contentText: "",
     buttonText: "",
     buttonFn: undefined,
+    other: undefined,
 };
 
 const getOtherOptions = (isEditable, element) => {
@@ -151,7 +155,15 @@ export default function Campaign() {
                     title: "Campaign Created",
                     contentText: `Campaign '${state.campaign.name}' successfully created `,
                     buttonText: "Great",
-                    buttonFn: () => history.push(`/${DASHBOARD_URL}`),
+                    buttonFn: () => history.replace(`/${DASHBOARD_URL}`),
+                });
+            } else if (state.status.deleteCampaignSuccess) {
+                setAlert({
+                    open: true,
+                    title: "Campaign Deleted",
+                    contentText: `Campaign '${state.campaign.name}' successfully created `,
+                    buttonText: "Great",
+                    buttonFn: () => history.replace(`/${DASHBOARD_URL}`),
                 });
             } else if (state.status.updateCampaignSuccess) {
                 setAlert({
@@ -233,8 +245,28 @@ export default function Campaign() {
         else createCampaign(data, dispatch);
     };
 
+    const handleDelete = (e) => {
+        e.preventDefault();
+
+        // console.log(alert);
+        setAlert({
+            open: true,
+            title: "Warning",
+            contentText: `Are you sure to delete the campaign '${state.campaign.name}'? `,
+            buttonText: "Yes",
+            buttonFn: () => {
+                handleAlertOpen();
+                deleteCampaign(campaignId, dispatch);
+            },
+            other: {
+                secondaryButtonText: "No",
+                secondaryButtonFn: () => handleAlertOpen(),
+            },
+        });
+    };
+
     const handleCancel = (e) => {
-        history.push(`/${DASHBOARD_URL}`);
+        history.replace(`/${DASHBOARD_URL}`);
     };
 
     const handleAlertOpen = () => {
@@ -248,6 +280,7 @@ export default function Campaign() {
                 {/*loading*/}
                 {(status.getCampaignInProgress ||
                     status.createCampaignInProgress ||
+                    status.deleteCampaignInProgress ||
                     status.updateCampaignInProgress) && (
                     <Container maxWidth="sm">
                         <Box justifyContent="center" display="flex">
@@ -259,8 +292,6 @@ export default function Campaign() {
                 {status.getCampaignFailed && (
                     <Container maxWidth="sm">
                         <Typography
-                            component="h1"
-                            variant="h3"
                             align="center"
                             color="textPrimary"
                             gutterBottom
@@ -274,6 +305,7 @@ export default function Campaign() {
                 {!(
                     status.getCampaignInProgress ||
                     status.createCampaignInProgress ||
+                    status.deleteCampaignInProgress ||
                     status.updateCampaignInProgress
                 ) && (
                     <>
@@ -509,7 +541,7 @@ export default function Campaign() {
                                         spacing={2}
                                         justify="space-between"
                                     >
-                                        <Grid item xs={6}>
+                                        <Grid item>
                                             <Button
                                                 fullWidth
                                                 variant="contained"
@@ -530,7 +562,7 @@ export default function Campaign() {
                                                 }`}
                                             </Button>
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid item>
                                             <Button
                                                 fullWidth
                                                 variant="contained"
@@ -547,6 +579,19 @@ export default function Campaign() {
                                                 }`}
                                             </Button>
                                         </Grid>
+                                        {!isCreate && (
+                                            <Grid item>
+                                                <Button
+                                                    variant="contained"
+                                                    color="secondary"
+                                                    className={classes.button}
+                                                    startIcon={<DeleteIcon />}
+                                                    onClick={handleDelete}
+                                                >
+                                                    Delete Campaign
+                                                </Button>
+                                            </Grid>
+                                        )}
                                     </Grid>
                                 )}
                             </Container>
@@ -557,6 +602,7 @@ export default function Campaign() {
                             contentText={alert.contentText}
                             buttonText={alert.buttonText}
                             buttonFn={alert.buttonFn || handleAlertOpen}
+                            other={alert.other}
                         />
                     </>
                 )}

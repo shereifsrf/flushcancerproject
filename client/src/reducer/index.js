@@ -25,6 +25,9 @@ import {
     AUTO_AUTHENTICATE_USER_FAILED,
     AUTO_AUTHENTICATE_USER_IN_PROGRESS,
     AUTO_AUTHENTICATE_USER_FAILED_NO_LOCALS,
+    DELETE_CAMPAIGN_IN_PROGRESS,
+    DELETE_CAMPAIGN_SUCCESS,
+    DELETE_CAMPAIGN_FAILED,
 } from "../constants";
 
 export const initialState = {
@@ -325,6 +328,42 @@ export const reducer = (state, action) => {
                     getCampaignListInProgress: true,
                 },
             };
+
+        case DELETE_CAMPAIGN_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                campaign: data,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    deleteCampaignSuccess: true,
+                },
+            };
+
+        case DELETE_CAMPAIGN_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                campaigns: null,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    deleteCampaignFailed: true,
+                },
+            };
+
+        case DELETE_CAMPAIGN_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCampaignStatus,
+                    deleteCampaignInProgress: true,
+                },
+            };
         default:
             return state;
     }
@@ -343,6 +382,9 @@ const clearCampaignStatus = {
     getCampaignListSuccess: false,
     getCampaignListFailed: false,
     getCampaignListInProgress: false,
+    deleteCampaignSuccess: false,
+    deleteCampaignFailed: false,
+    deleteCampaignInProgress: false,
 };
 
 const clearError = {
