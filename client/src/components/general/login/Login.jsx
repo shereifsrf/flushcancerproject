@@ -88,6 +88,8 @@ const Login = () => {
                 });
             }
             setData({ ...data, inProgress: false });
+        } else if (state.hasError) {
+            setData({ ...data, inProgress: false });
         }
     }, [state]);
 
