@@ -16,7 +16,7 @@ import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { limitCharWithDots } from "../../../util";
 import { LinearProgress, Box } from "@material-ui/core";
-import { Link, useRouteMatch } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLayoutEffect } from "react";
 import { isEmpty } from "lodash";
 import { Buffer } from "buffer";
@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     },
     desc: {
         maxHeight: 100,
+        wordWrap: "break-word",
     },
     cardContent: {
         flexGrow: 1,
@@ -69,7 +70,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CampaignCard({ campaign, dashboard }) {
     // console.log(campaign);
-    const { url, path } = useRouteMatch();
     const [imgSrc, setImgSrc] = useState("");
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
@@ -91,7 +91,6 @@ export default function CampaignCard({ campaign, dashboard }) {
     }, []);
     return (
         <Card key={campaign.id} className={classes.card}>
-            {/* <Link to={`${url}/${campaign.id}`} className={classes.link}> */}
             <Link
                 to={`${dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS}/${
                     campaign.id
@@ -159,7 +158,9 @@ export default function CampaignCard({ campaign, dashboard }) {
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
                     <Typography paragraph>Description:</Typography>
-                    <Typography paragraph>{campaign.description}</Typography>
+                    <Typography style={{ wordWrap: "break-word" }} paragraph>
+                        {campaign.description}
+                    </Typography>
                 </CardContent>
             </Collapse>
         </Card>

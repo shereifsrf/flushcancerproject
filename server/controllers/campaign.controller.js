@@ -120,12 +120,14 @@ exports.update = async (req, res, next) => {
     }
 };
 
-exports.remove = (req, res, next) => {
+exports.remove = async (req, res, next) => {
     const { campaign } = req.locals;
 
     campaign
         .remove()
-        .then(() => res.status(httpStatus.NO_CONTENT).end())
+        .then(async () =>
+            res.status(httpStatus.OK).json(await campaign.transform())
+        )
         .catch((e) => next(e));
 };
 

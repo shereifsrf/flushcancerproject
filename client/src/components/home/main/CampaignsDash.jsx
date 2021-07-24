@@ -136,7 +136,7 @@ export default function Album() {
                                         size="small"
                                         color="primary"
                                         onClick={() =>
-                                            history.push(
+                                            history.replace(
                                                 `/${CAMPAIGNS_URL}/${card.id}`
                                             )
                                         }

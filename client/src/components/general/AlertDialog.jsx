@@ -5,7 +5,6 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { useHistory } from "react-router-dom";
 
 export default function AlertDialog(props) {
     const [open, setOpen] = React.useState(false);
@@ -18,10 +17,17 @@ export default function AlertDialog(props) {
         setOpen(true);
     };
 
-    const handleClose = () => {
+    const handleClose = (e) => {
         setOpen(false);
-        if (props.buttonFn) {
+        if (props.buttonFn && e.currentTarget.name === "primary") {
             props.buttonFn();
+        } else if (
+            props.other &&
+            props.other.secondaryButtonFn &&
+            e.currentTarget.name === "secondary"
+        ) {
+            // console.log("here", !!props.other);
+            props.other.secondaryButtonFn();
         }
     };
 
@@ -40,9 +46,22 @@ export default function AlertDialog(props) {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
+                    <Button
+                        name="primary"
+                        onClick={handleClose}
+                        color="primary"
+                    >
                         {props.buttonText}
                     </Button>
+                    {props.other && (
+                        <Button
+                            name="secondary"
+                            onClick={handleClose}
+                            color="primary"
+                        >
+                            {props.other.secondaryButtonText || "No"}
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
         </div>
