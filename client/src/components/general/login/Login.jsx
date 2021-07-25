@@ -70,10 +70,15 @@ const Login = () => {
     const status = state.status;
 
     useLayoutEffect(() => {
-        if (!state.isAuthenticated) {
+        if (
+            !state.isAuthenticated &&
+            !status.autoAuthenticateUserInProgress &&
+            !status.autoAuthenticateUserFailed &&
+            !status.autoAuthenticateUserFailedNoLocals
+        ) {
             autoAuthenticateUser(dispatch);
         }
-    }, []);
+    }, [state]);
 
     useEffect(() => {
         // console.log(status);
