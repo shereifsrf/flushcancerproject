@@ -1,5 +1,6 @@
 const httpStatus = require("http-status");
 const { omit, isUndefined } = require("lodash");
+const moment = require("moment-timezone");
 const {
     ADMIN,
     ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS,
@@ -7,7 +8,9 @@ const {
     CAMPAIGNER,
 } = require("../config/constants");
 const Campaign = require("../models/campaign.model");
+const Donation = require("../models/donation.model");
 const User = require("../models/user.model");
+const ObjectId = require("mongoose").Types.ObjectId;
 
 /**
  * Load user and append to req.
@@ -131,5 +134,28 @@ exports.remove = async (req, res, next) => {
         .catch((e) => next(e));
 };
 
-exports.get = async (req, res) =>
+exports.get = async (req, res) => {
+    // console.log("herer");
+    //get all the comments
+    // try {
+    //     const d = await Donation.aggregate([
+    //         {
+    //             $match: { campaignId: ObjectId("60fb8b886b921944041fdd1d") },
+    //         },
+    //         {
+    //             $group: {
+    //                 _id: "$campaignId",
+    //                 totalDonation: { $sum: "$amount" },
+    //             },
+    //         },
+    //     ]);
+    // } catch (error) {
+    //     console.log("herer");
+    //     return next(error);
+    // }
+    // const d = await Campaign.find(
+    //     { _id: "60e95a8533169558cc034ffd" },
+    //     { isVerified: 1 }
+    // );
     res.send(await req.locals.campaign.transform(req.user));
+};

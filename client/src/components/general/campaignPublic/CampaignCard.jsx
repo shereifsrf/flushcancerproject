@@ -15,7 +15,7 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { limitCharWithDots } from "../../../util";
-import { LinearProgress, Box } from "@material-ui/core";
+import { LinearProgress, Box, Grid } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useLayoutEffect } from "react";
 import { isEmpty } from "lodash";
@@ -23,6 +23,7 @@ import { Buffer } from "buffer";
 import { PUBLIC_CAMPAIGNS, CAMPAIGNS_URL } from "../../../constants";
 import LockIcon from "@material-ui/icons/Lock";
 import VerifiedUserIcon from "@material-ui/icons/VerifiedUser";
+import { format } from "date-fns";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -54,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: green[500],
     },
     desc: {
+        marginTop: theme.spacing(2),
         maxHeight: 100,
         wordWrap: "break-word",
     },
@@ -73,8 +75,9 @@ export default function CampaignCard({ campaign, dashboard }) {
     const [imgSrc, setImgSrc] = useState("");
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
-    const progressVal =
-        ((campaign["totalDonated"] || 0) / campaign.limit) * 100;
+    const progressVal = Math.round(
+        ((campaign.totalDonation || 0) / campaign.limit) * 100
+    ).toFixed(2);
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -89,6 +92,8 @@ export default function CampaignCard({ campaign, dashboard }) {
             : imgSrc.current;
         setImgSrc(v);
     }, []);
+
+    console.log(campaign);
     return (
         <Card key={campaign.id} className={classes.card}>
             <Link
@@ -120,7 +125,10 @@ export default function CampaignCard({ campaign, dashboard }) {
                     //   </IconButton>
                     // }
                     title={limitCharWithDots(campaign.name, 75)}
-                    subheader="September 14, 2016"
+                    subheader={`Expires: ${format(
+                        new Date(campaign.expiresAt),
+                        "dd LLL yyyy"
+                    )}`}
                 />
             </Link>
             <CardMedia component="img" src={imgSrc} alt="No Image" />
@@ -130,9 +138,14 @@ export default function CampaignCard({ campaign, dashboard }) {
                     <LinearProgress
                         color="primary"
                         variant="determinate"
-                        value={progressVal}
+                        value={parseFloat(progressVal)}
                     />
                 </Box>
+                <Grid container justify="space-between">
+                    <Grid item>${campaign.totalDonation}</Grid>
+                    <Grid item>${campaign.limit}</Grid>
+                </Grid>
+
                 <Typography className={classes.desc}>
                     {limitCharWithDots(campaign.description, 150)}
                 </Typography>

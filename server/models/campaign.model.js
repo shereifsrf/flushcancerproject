@@ -1,9 +1,12 @@
-const { isNil, omitBy, pick } = require("lodash");
+const { isNil, omitBy, pick, isEmpty } = require("lodash");
 const mongoose = require("mongoose");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
 const { USER_CAMPAIGN_RATING_THRESHOLD } = require("../config/constants");
 const Category = require("./category.model");
+const User = require("./user.model");
+const moment = require("moment-timezone");
+const Donation = require("./donation.model");
 
 /**
  * Campaign Schema
@@ -56,7 +59,7 @@ const campaignSchema = new mongoose.Schema(
         expiresAt: {
             type: Date,
             required: true,
-            default: Date.now() + 30,
+            default: moment().add(30, "days"),
         },
         remarks: {
             type: String,
@@ -81,6 +84,7 @@ campaignSchema.statics = {
             if (mongoose.Types.ObjectId.isValid(id)) {
                 campaign = await Campaign.findById(id)
                     .populate("categoryId")
+                    .populate("userId")
                     .exec();
 
                 // const campaign = await Campaign.findById(
@@ -158,6 +162,7 @@ campaignSchema.method({
                 "isVerifyDocument",
                 "editable",
                 "expiresAt",
+                "totalDonation",
             ];
             // console.log(this);
 
@@ -168,56 +173,107 @@ campaignSchema.method({
                 if (user.rating >= USER_CAMPAIGN_RATING_THRESHOLD)
                     this["isVerifyDocument"] = false;
             }
+            //get the total donations
+            let totalDonation = 0;
 
-            await Promise.all(
-                fields.map(async (field) => {
-                    switch (field) {
-                        case "limit":
-                            transformed[field] = parseFloat(
-                                this[field].toString()
-                            );
-                            break;
-                        // case "isVerifyDocument":
-                        //     transformed[field] =
-                        //     break;
-                        case "categoryId":
-                            // console.log(this[field]);
-                            if (this[field] && this[field].name) {
-                                console.log("yep");
-                                const category = new Category(this[field]);
-                                const transformedCategory =
-                                    category.transform();
-                                transformed["category"] = pick(
-                                    transformedCategory,
-                                    ["id", "name"]
+            await Promise.all([
+                Donation.aggregate([
+                    {
+                        $match: {
+                            campaignId: mongoose.Types.ObjectId(this["id"]),
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$campaignId",
+                            totalDonation: { $sum: "$amount" },
+                        },
+                    },
+                ])
+                    .then((res) => {
+                        if (!isEmpty(res)) totalDonation = res[0].totalDonation;
+                    })
+                    .catch(),
+                Promise.all(
+                    fields.map(async (field) => {
+                        switch (field) {
+                            case "limit":
+                                transformed[field] = parseFloat(
+                                    this[field].toString()
                                 );
-                            } else if (this[field]) {
-                                const categoryData = await Category.findById(
-                                    this[field]
-                                );
-                                const category = new Category(categoryData);
-                                // console.log(category);
-                                const transformedCategory =
-                                    category.transform();
-                                transformed["category"] = pick(
-                                    transformedCategory,
-                                    ["id", "name"]
-                                );
-                                // console.log("here");
-                            } else {
-                                transformed["category"] = { id: "", name: "" };
-                            }
-                            break;
-                        case "isVerified":
-                            transformed[field] = this[field];
-                            break;
-                        default:
-                            transformed[field] = this[field] || null;
-                            break;
-                    }
-                })
-            );
+                                break;
+                            // case "isVerifyDocument":
+                            //     transformed[field] =
+                            //     break;
+                            case "categoryId":
+                                // console.log(this[field]);
+                                if (this[field] && this[field].name) {
+                                    // console.log("yep");
+                                    const category = new Category(this[field]);
+                                    const transformedCategory =
+                                        category.transform();
+                                    transformed["category"] = pick(
+                                        transformedCategory,
+                                        ["id", "name"]
+                                    );
+                                } else if (this[field]) {
+                                    const categoryData =
+                                        await Category.findById(this[field]);
+                                    const category = new Category(categoryData);
+                                    // console.log(category);
+                                    const transformedCategory =
+                                        category.transform();
+                                    transformed["category"] = pick(
+                                        transformedCategory,
+                                        ["id", "name"]
+                                    );
+                                    // console.log("here");
+                                } else {
+                                    transformed["category"] = {
+                                        id: "",
+                                        name: "",
+                                    };
+                                }
+                                break;
+                            case "isVerified":
+                                transformed[field] = this[field];
+                                break;
+                            case "userId":
+                                if (this[field] && this[field].name) {
+                                    // console.log("yep");
+                                    const category = new User(this[field]);
+                                    const transformedCategory =
+                                        category.transform();
+                                    transformed["user"] = pick(
+                                        transformedCategory,
+                                        ["id", "name"]
+                                    );
+                                } else if (this[field]) {
+                                    const categoryData = await User.findById(
+                                        this[field]
+                                    );
+                                    const category = new User(categoryData);
+                                    // console.log(category);
+                                    const transformedCategory =
+                                        category.transform();
+                                    transformed["user"] = pick(
+                                        transformedCategory,
+                                        ["id", "name"]
+                                    );
+                                    // console.log("here");
+                                } else {
+                                    transformed["user"] = { id: "", name: "" };
+                                }
+                                break;
+                            default:
+                                transformed[field] = this[field] || null;
+                                break;
+                        }
+                    })
+                ),
+            ]);
 
+            transformed["totalDonation"] = totalDonation;
             // console.log(transformed);
             return transformed;
         } catch (e) {

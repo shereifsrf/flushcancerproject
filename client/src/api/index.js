@@ -28,6 +28,9 @@ import {
     DELETE_CAMPAIGN_IN_PROGRESS,
     DELETE_CAMPAIGN_SUCCESS,
     DELETE_CAMPAIGN_FAILED,
+    CREATE_DONATION_IN_PROGRESS,
+    CREATE_DONATION_SUCCESS,
+    CREATE_DONATION_FAILED,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -309,6 +312,34 @@ export const createCampaign = (data, dispatch) => {
         })
         .catch((error) => {
             return handleFailure(error, CREATE_CAMPAIGN_FAILED, dispatch);
+        });
+};
+
+export const createDonation = ({ campaignId, amount }, dispatch) => {
+    dispatch({ type: CREATE_DONATION_IN_PROGRESS });
+
+    instance
+        .post(
+            `donations`,
+            { campaignId, amount },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_DONATION_SUCCESS,
+                payload: res.data,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_DONATION_FAILED, dispatch);
         });
 };
 
