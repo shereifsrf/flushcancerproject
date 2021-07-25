@@ -23,7 +23,7 @@ exports.create = async (req, res, next) => {
     try {
         if (req.user.role !== ADMIN || isUndefined(req.body.userId))
             req.body.userId = req.user._id;
-        console.log("herer1s");
+        // console.log("herer1s");
 
         const apiError = new APIError({
             message: "Campaign not verified or found",
@@ -36,9 +36,9 @@ exports.create = async (req, res, next) => {
             { isVerified: 1 }
         ).exec();
 
-        console.log("herer", campaign);
+        // console.log("herer", campaign);
 
-        if (isEmpty(campaign) || campaign[0].isVerified) {
+        if (isEmpty(campaign) || !campaign[0].isVerified) {
             throw apiError;
         }
 

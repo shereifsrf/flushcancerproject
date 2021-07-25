@@ -537,11 +537,7 @@ export default function Campaign() {
                                     </div>
                                 )}
                                 {isEditable() && (
-                                    <Grid
-                                        container
-                                        spacing={2}
-                                        justify="space-between"
-                                    >
+                                    <Grid container justify="space-between">
                                         <Grid item>
                                             <Button
                                                 fullWidth

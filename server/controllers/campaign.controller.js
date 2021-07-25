@@ -135,7 +135,7 @@ exports.remove = async (req, res, next) => {
 };
 
 exports.get = async (req, res) => {
-    // console.log("herer");
+    // console.log(req.user);
     //get all the comments
     // try {
     //     const d = await Donation.aggregate([

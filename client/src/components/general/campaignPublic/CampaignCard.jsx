@@ -93,7 +93,7 @@ export default function CampaignCard({ campaign, dashboard }) {
         setImgSrc(v);
     }, []);
 
-    console.log(campaign);
+    // console.log(campaign);
     return (
         <Card key={campaign.id} className={classes.card}>
             <Link

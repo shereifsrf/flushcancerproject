@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 const PrivateRoute = ({ children, ...rest }) => {
     const { state } = useAuthContext();
+    // console.log(state);
     return (
         <Route
             {...rest}

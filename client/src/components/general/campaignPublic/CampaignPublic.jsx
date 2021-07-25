@@ -129,7 +129,7 @@ export default function CampaignPublic() {
     useEffect(() => {
         if (status.getCampaignSuccess && data.isUnloaded) {
             const campaign = state.campaign;
-            console.log(campaign.totalDonation + data.amount);
+            // console.log(campaign.totalDonation + data.amount);
             const document = campaign.document || null;
             const category = campaign.category || {
                 name: "Not-Found",

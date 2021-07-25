@@ -167,8 +167,7 @@ campaignSchema.method({
             // console.log(this);
 
             if (user) {
-                // console.log(this["userId"].toString() === user.id);
-                if (user.id === this["userId"].toString())
+                if (user.id === this["userId"]._id.toString())
                     this["editable"] = true;
                 if (user.rating >= USER_CAMPAIGN_RATING_THRESHOLD)
                     this["isVerifyDocument"] = false;
