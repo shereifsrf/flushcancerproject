@@ -51,7 +51,7 @@ export default function CampaignList(props) {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Campaigns List
+                            Campaign List
                         </Typography>
                         {/* <Typography
                             variant="h5"
@@ -90,7 +90,7 @@ export default function CampaignList(props) {
                                         item
                                         key={campaign.id}
                                         sm={6}
-                                        md={4}
+                                        md={props.dashboard ? 6 : 4}
                                         lg={4}
                                     >
                                         <CampaignCard

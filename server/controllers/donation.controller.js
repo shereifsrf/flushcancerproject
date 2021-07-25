@@ -91,4 +91,5 @@ exports.remove = (req, res, next) => {
         .catch((e) => next(e));
 };
 
-exports.get = (req, res) => res.json(req.locals.donation.transform());
+exports.get = async (req, res) =>
+    res.json(await req.locals.donation.transform());
