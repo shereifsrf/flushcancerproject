@@ -13,7 +13,7 @@ router.param("campaignLikeId", controller.load);
 
 router
     .route("/")
-    .get(authorize(ADMIN), controller.list)
+    .get(findAccess(), controller.list)
     .post(authorize(LOGGED_USER), controller.create);
 
 router

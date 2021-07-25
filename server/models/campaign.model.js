@@ -7,6 +7,7 @@ const Category = require("./category.model");
 const User = require("./user.model");
 const moment = require("moment-timezone");
 const Donation = require("./donation.model");
+const CampaignLike = require("./campaign.like.model");
 
 /**
  * Campaign Schema
@@ -151,7 +152,7 @@ campaignSchema.method({
                 "categoryId",
                 "name",
                 "description",
-                "document",
+                // "document",
                 "limit",
                 "createdAt",
                 "updatedAt",
@@ -174,25 +175,33 @@ campaignSchema.method({
             }
             //get the total donations
             let totalDonation = 0;
+            let totalLikes = 0;
+            let likable = true;
 
             await Promise.all([
-                Donation.aggregate([
+                getTotalDonation(this["id"]).then(
+                    (res) =>
+                        (totalDonation = !isEmpty(res)
+                            ? res[0].totalDonation
+                            : 0)
+                ),
+                getTotalLikes(this["id"]).then(
+                    (res) =>
+                        (totalLikes = !isEmpty(res) ? res[0].totalLikes : 0)
+                ),
+
+                CampaignLike.countDocuments(
                     {
-                        $match: {
-                            campaignId: mongoose.Types.ObjectId(this["id"]),
-                        },
+                        campaignId: this["id"],
+                        userId: user.id,
                     },
-                    {
-                        $group: {
-                            _id: "$campaignId",
-                            totalDonation: { $sum: "$amount" },
-                        },
-                    },
-                ])
-                    .then((res) => {
-                        if (!isEmpty(res)) totalDonation = res[0].totalDonation;
-                    })
-                    .catch(),
+                    function (err, count) {
+                        if (!err && count !== 0) {
+                            likable = false;
+                        }
+                    }
+                ),
+
                 Promise.all(
                     fields.map(async (field) => {
                         switch (field) {
@@ -273,6 +282,8 @@ campaignSchema.method({
             ]);
 
             transformed["totalDonation"] = totalDonation;
+            transformed["totalLikes"] = totalLikes;
+            transformed["likable"] = likable;
             // console.log(transformed);
             return transformed;
         } catch (e) {
@@ -280,6 +291,46 @@ campaignSchema.method({
         }
     },
 });
+
+const getTotalLikes = async (campaignId) => {
+    return new Promise((resolve, reject) => {
+        CampaignLike.aggregate([
+            {
+                $match: {
+                    campaignId: mongoose.Types.ObjectId(campaignId),
+                },
+            },
+            {
+                $group: {
+                    _id: "$campaignId",
+                    totalLikes: { $sum: 1 },
+                },
+            },
+        ])
+            .then((result) => resolve(result))
+            .catch((error) => reject(error));
+    });
+};
+
+const getTotalDonation = async (campaignId) => {
+    return new Promise((resolve, reject) => {
+        Donation.aggregate([
+            {
+                $match: {
+                    campaignId: mongoose.Types.ObjectId(campaignId),
+                },
+            },
+            {
+                $group: {
+                    _id: "$campaignId",
+                    totalDonation: { $sum: "$amount" },
+                },
+            },
+        ])
+            .then((result) => resolve(result))
+            .catch((error) => reject(error));
+    });
+};
 
 const Campaign = mongoose.model("Campaign", campaignSchema);
 module.exports = Campaign;

@@ -1,6 +1,5 @@
 const httpStatus = require("http-status");
-const { omit, isUndefined } = require("lodash");
-const moment = require("moment-timezone");
+const { omit, isUndefined, isEmpty } = require("lodash");
 const {
     ADMIN,
     ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS,
@@ -8,9 +7,11 @@ const {
     CAMPAIGNER,
 } = require("../config/constants");
 const Campaign = require("../models/campaign.model");
-const Donation = require("../models/donation.model");
+const CampaignComment = require("../models/campaign.comment.model");
 const User = require("../models/user.model");
-const ObjectId = require("mongoose").Types.ObjectId;
+const CampaignLike = require("../models/campaign.like.model");
+const mongoose = require("mongoose");
+const Donation = require("../models/donation.model");
 
 /**
  * Load user and append to req.
@@ -65,7 +66,7 @@ exports.list = async (req, res, next) => {
                 ...omit(query, ["dashboard", "isVerified"]),
                 userId: req.user.id,
             };
-            console.log("here", query);
+            // console.log("here", query);
         }
         const campaigns = await Campaign.list(query);
         const transformedCampaigns = await Promise.all(
@@ -135,27 +136,23 @@ exports.remove = async (req, res, next) => {
 };
 
 exports.get = async (req, res) => {
-    // console.log(req.user);
     //get all the comments
-    // try {
-    //     const d = await Donation.aggregate([
-    //         {
-    //             $match: { campaignId: ObjectId("60fb8b886b921944041fdd1d") },
-    //         },
-    //         {
-    //             $group: {
-    //                 _id: "$campaignId",
-    //                 totalDonation: { $sum: "$amount" },
-    //             },
-    //         },
-    //     ]);
-    // } catch (error) {
-    //     console.log("herer");
-    //     return next(error);
-    // }
-    // const d = await Campaign.find(
-    //     { _id: "60e95a8533169558cc034ffd" },
-    //     { isVerified: 1 }
-    // );
-    res.send(await req.locals.campaign.transform(req.user));
+    const query = req.query;
+    if (query.comments) {
+        query.campaignId = req.locals.campaign.id;
+    }
+    const result = await Promise.all([
+        req.locals.campaign.transform(req.user),
+        getComments(req.user, query),
+    ]);
+
+    res.send({ ...result[0], comments: result[1] });
+};
+
+const getComments = async (user, query) => {
+    const comments = await CampaignComment.list(query);
+    // console.log(comments);
+    return await Promise.all(
+        comments.map((comment) => comment.transform(user))
+    );
 };

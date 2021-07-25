@@ -34,7 +34,9 @@ exports.create = async (req, res, next) => {
 
 exports.list = async (req, res, next) => {
     try {
-        const campaignComments = await CampaignComment.list(req.query);
+        const query = req.query;
+        // console.log(c);
+        const campaignComments = await CampaignComment.list(query);
         const transformedCampaignComments = campaignComments.map(
             (campaignComment) => campaignComment.transform()
         );
@@ -64,7 +66,7 @@ exports.remove = (req, res, next) => {
 
     campaignComment
         .remove()
-        .then(() => res.status(httpStatus.NO_CONTENT).end())
+        .then(() => res.status(httpStatus.OK).end())
         .catch((e) => next(e));
 };
 

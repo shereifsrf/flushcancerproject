@@ -53,7 +53,7 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
                             req.locals.campaignLike.userId.toString() !==
                                 user._id.toString()) ||
                         (!isUndefined(req.locals.campaignComment) &&
-                            req.locals.campaignComment.userId.toString() !==
+                            req.locals.campaignComment.userId._id.toString() !==
                                 user._id.toString()) ||
                         (!isUndefined(req.locals.campaignRating) &&
                             req.locals.campaignRating.userId.toString() !==

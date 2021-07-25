@@ -34,6 +34,21 @@ import {
     GET_DONATION_LIST_IN_PROGRESS,
     GET_DONATION_LIST_SUCCESS,
     GET_DONATION_LIST_FAILED,
+    CREATE_COMMENT_IN_PROGRESS,
+    CREATE_COMMENT_SUCCESS,
+    CREATE_COMMENT_FAILED,
+    UPDATE_COMMENT_IN_PROGRESS,
+    UPDATE_COMMENT_SUCCESS,
+    UPDATE_COMMENT_FAILED,
+    DELETE_COMMENT_IN_PROGRESS,
+    DELETE_COMMENT_SUCCESS,
+    DELETE_COMMENT_FAILED,
+    DELETE_LIKE_FAILED,
+    DELETE_LIKE_SUCCESS,
+    DELETE_LIKE_IN_PROGRESS,
+    CREATE_LIKE_FAILED,
+    CREATE_LIKE_SUCCESS,
+    CREATE_LIKE_IN_PROGRESS,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -189,11 +204,14 @@ export const userRegister = (data, dispatch) => {
         });
 };
 
-export const getCampaign = (campaignId, dispatch) => {
+export const getCampaign = (campaignId, dispatch, comments = false) => {
     dispatch({ type: GET_CAMPAIGN_IN_PROGRESS });
 
     instance
         .get(`campaigns/${campaignId}`, {
+            params: {
+                comments,
+            },
             headers: {
                 Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
             },
@@ -346,6 +364,82 @@ export const createDonation = ({ campaignId, amount }, dispatch) => {
         });
 };
 
+export const createComment = ({ campaignId, comment }, dispatch) => {
+    dispatch({ type: CREATE_COMMENT_IN_PROGRESS });
+
+    instance
+        .post(
+            `campaigncomments`,
+            { campaignId, comment },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_COMMENT_SUCCESS,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_COMMENT_FAILED, dispatch);
+        });
+};
+
+export const updateComment = ({ commentId, body }, dispatch) => {
+    dispatch({ type: UPDATE_COMMENT_IN_PROGRESS });
+
+    instance
+        .patch(
+            `campaigncomments/${commentId}`,
+            { ...body },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: UPDATE_COMMENT_SUCCESS,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, UPDATE_COMMENT_FAILED, dispatch);
+        });
+};
+
+export const deleteComment = (commentId, dispatch) => {
+    dispatch({ type: DELETE_COMMENT_IN_PROGRESS });
+
+    instance
+        .delete(`campaigncomments/${commentId}`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            if (res.status === 200) {
+                // console.log(res.data.document);
+                return dispatch({
+                    type: DELETE_COMMENT_SUCCESS,
+                });
+            }
+        })
+        .catch((error) => {
+            return handleFailure(error, DELETE_COMMENT_FAILED, dispatch);
+        });
+};
+
 export const getCampaignList = (dashboard, dispatch) => {
     dispatch({ type: GET_CAMPAIGN_LIST_IN_PROGRESS });
 
@@ -392,6 +486,55 @@ export const getDonationList = (dispatch) => {
         })
         .catch((error) => {
             return handleFailure(error, GET_DONATION_LIST_FAILED, dispatch);
+        });
+};
+
+export const createLike = (body, dispatch) => {
+    dispatch({ type: CREATE_LIKE_IN_PROGRESS });
+
+    instance
+        .post(
+            `campaigncomments`,
+            { ...body },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_LIKE_SUCCESS,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_LIKE_FAILED, dispatch);
+        });
+};
+
+export const deletelike = (likeId, dispatch) => {
+    dispatch({ type: DELETE_LIKE_IN_PROGRESS });
+
+    instance
+        .delete(`campaignlikes/${likeId}`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            if (res.status === 200) {
+                // console.log(res.data.document);
+                return dispatch({
+                    type: DELETE_LIKE_SUCCESS,
+                });
+            }
+        })
+        .catch((error) => {
+            return handleFailure(error, DELETE_LIKE_FAILED, dispatch);
         });
 };
 

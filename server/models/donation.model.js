@@ -138,8 +138,6 @@ donationSchema.method({
             }
         });
 
-        fields.forEach((field) => {});
-
         return transformed;
     },
 });
