@@ -34,6 +34,21 @@ import {
     GET_DONATION_LIST_IN_PROGRESS,
     GET_DONATION_LIST_SUCCESS,
     GET_DONATION_LIST_FAILED,
+    CREATE_COMMENT_IN_PROGRESS,
+    CREATE_COMMENT_SUCCESS,
+    CREATE_COMMENT_FAILED,
+    UPDATE_COMMENT_IN_PROGRESS,
+    UPDATE_COMMENT_SUCCESS,
+    UPDATE_COMMENT_FAILED,
+    DELETE_COMMENT_IN_PROGRESS,
+    DELETE_COMMENT_SUCCESS,
+    DELETE_COMMENT_FAILED,
+    DELETE_LIKE_FAILED,
+    DELETE_LIKE_SUCCESS,
+    DELETE_LIKE_IN_PROGRESS,
+    CREATE_LIKE_FAILED,
+    CREATE_LIKE_SUCCESS,
+    CREATE_LIKE_IN_PROGRESS,
 } from "../constants";
 
 export const initialState = {
@@ -46,6 +61,7 @@ export const initialState = {
         ...clearCampaignStatus,
         ...clearAuthStatus,
         ...clearDonationStatus,
+        ...clearCommentStatus,
         getCategoryListSuccess: false,
         getCategoryListFailed: false,
         getCategoryListInProgress: false,
@@ -161,6 +177,7 @@ export const reducer = (state, action) => {
                 campaign: data,
                 status: {
                     ...state.status,
+                    ...clearCommentStatus,
                     getCampaignSuccess: true,
                     getCampaignFailed: false,
                     getCampaignInProgress: false,
@@ -174,6 +191,7 @@ export const reducer = (state, action) => {
                 message: data.message,
                 status: {
                     ...state.status,
+                    ...clearCommentStatus,
                     getCampaignSuccess: false,
                     getCampaignFailed: true,
                     getCampaignInProgress: false,
@@ -185,6 +203,7 @@ export const reducer = (state, action) => {
                 ...clearError,
                 status: {
                     ...state.status,
+                    ...clearCommentStatus,
                     getCampaignSuccess: false,
                     getCampaignFailed: false,
                     getCampaignInProgress: true,
@@ -273,6 +292,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCampaignStatus,
+                    ...clearCommentStatus,
                     createCampaignSuccess: true,
                 },
             };
@@ -285,6 +305,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCampaignStatus,
+                    ...clearCommentStatus,
                     createCampaignFailed: true,
                 },
             };
@@ -296,6 +317,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCampaignStatus,
+                    ...clearCommentStatus,
                     createCampaignInProgress: true,
                 },
             };
@@ -444,6 +466,174 @@ export const reducer = (state, action) => {
                     getDonationListInProgress: true,
                 },
             };
+        case CREATE_COMMENT_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    createCommentSuccess: true,
+                },
+            };
+
+        case CREATE_COMMENT_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    createCommentInProgress: true,
+                },
+            };
+
+        case CREATE_COMMENT_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    createCommentFailed: true,
+                },
+            };
+
+        case UPDATE_COMMENT_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    updateCommentSuccess: true,
+                },
+            };
+
+        case UPDATE_COMMENT_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    updateCommentInProgress: true,
+                },
+            };
+
+        case UPDATE_COMMENT_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    updateCommentFailed: true,
+                },
+            };
+        case DELETE_COMMENT_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    deleteCommentSuccess: true,
+                },
+            };
+
+        case DELETE_COMMENT_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    deleteCommentInProgress: true,
+                },
+            };
+
+        case DELETE_COMMENT_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearCommentStatus,
+                    deleteCommentFailed: true,
+                },
+            };
+
+        case DELETE_LIKE_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    deleteLikeSuccess: true,
+                },
+            };
+
+        case DELETE_LIKE_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    deleteLikeInProgress: true,
+                },
+            };
+
+        case DELETE_LIKE_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    deleteLikeFailed: true,
+                },
+            };
+
+        case CREATE_LIKE_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    createLikeSuccess: true,
+                },
+            };
+
+        case CREATE_LIKE_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    createLikeInProgress: true,
+                },
+            };
+
+        case CREATE_LIKE_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearLikeStatus,
+                    createLikeFailed: true,
+                },
+            };
         default:
             return state;
     }
@@ -486,4 +676,25 @@ const clearAuthStatus = {
     autoAuthenticateUserFailed: false,
     autoAuthenticateUserFailedNoLocals: false,
     autoAuthenticateUserInProgress: false,
+};
+
+const clearCommentStatus = {
+    createCommentSuccess: false,
+    createCommentFailed: false,
+    createCommentInProgress: false,
+    updateCommentSuccess: false,
+    updateCommentFailed: false,
+    updateCommentInProgress: false,
+    deleteCommentSuccess: false,
+    deleteCommentFailed: false,
+    deleteCommentInProgress: false,
+};
+
+const clearLikeStatus = {
+    createLikeSuccess: false,
+    createLikeFailed: false,
+    createLikeInProgress: false,
+    deleteLikeSuccess: false,
+    deleteLikeFailed: false,
+    deleteLikeInProgress: false,
 };

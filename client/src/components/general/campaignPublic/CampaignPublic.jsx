@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
     CssBaseline,
     Box,
@@ -13,6 +13,7 @@ import {
     Typography,
     Divider,
     TextField,
+    Avatar,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import BG from "../../../images/island1.jpg";
@@ -22,14 +23,24 @@ import { campaigns } from "../../../dummyData";
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { limitCharWithDots } from "../../../util";
 import { useAuthContext } from "../../AuthProvider";
-import { getCampaign, createDonation } from "Api";
+import { getCampaign, createDonation, createComment } from "Api";
 import { useEffect } from "react";
-import { isEmpty } from "lodash";
+import { isEmpty, mapValues } from "lodash";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { Buffer } from "buffer";
-import { add, addMonths, format } from "date-fns";
+import { add, addMonths, format, formatDistance, subDays } from "date-fns";
 import InsertCommentIcon from "@material-ui/icons/InsertComment";
 import AlertDialog from "../AlertDialog";
+import { deleteComment, updateComment } from "../../../api";
+
+const getOtherOptions = (isEditable, element) => {
+    let result = {};
+    if (!isEditable) {
+        if (element === "number") result = { readOnly: true };
+        else result = { InputProps: { readOnly: true } };
+    }
+    return result;
+};
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -45,11 +56,11 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "column",
     },
-    interact: {
-        "& *": {
-            marginRight: 50,
-        },
-    },
+    // interact: {
+    //     "& *": {
+    //         marginRight: 50,
+    //     },
+    // },
     bottomSec: {
         backgroundColor: "#eceff1",
         marginBottom: theme.spacing(4),
@@ -71,6 +82,8 @@ const initAlert = {
     other: undefined,
 };
 
+const initField = {};
+
 const initData = {
     isUnloaded: true,
     name: "",
@@ -83,10 +96,15 @@ const initData = {
     user: { id: "", name: "" },
     totalDonation: 0,
     amount: 0,
+    comments: null,
+    comment: "",
+    likable: false,
+    totalLikes: 0,
 };
 
 export default function CampaignPublic() {
     const [data, setData] = useState(initData);
+    const [field, setField] = useState(initField);
     const [alert, setAlert] = useState(initAlert);
     const { campaignId } = useParams();
     const { state, dispatch } = useAuthContext();
@@ -94,7 +112,7 @@ export default function CampaignPublic() {
     const status = state.status;
 
     const getCampaignData = useCallback(() => {
-        getCampaign(campaignId, dispatch);
+        getCampaign(campaignId, dispatch, true);
     }, [campaignId]);
 
     useLayoutEffect(() => {
@@ -122,9 +140,21 @@ export default function CampaignPublic() {
                     contentText: `Successfully donated ${state.donation.amount}`,
                     buttonText: "Great",
                 });
+            } else if (
+                status.createCommentSuccess ||
+                status.updateCommentSuccess ||
+                status.deleteCommentSuccess
+            ) {
+                setData({ ...data, isUnloaded: true, comment: "" });
+                getCampaignData();
             }
         }
     }, [state]);
+
+    //for field
+    // useEffect(() => {
+    //     set
+    // }, [field])
 
     useEffect(() => {
         if (status.getCampaignSuccess && data.isUnloaded) {
@@ -152,7 +182,12 @@ export default function CampaignPublic() {
                 expiresAt: campaign.expiresAt || data.expiresAt,
                 user: campaign.user || data.user,
                 totalDonation: campaign.totalDonation || 0,
+                comments: campaign.comments || data.comments,
+                totalLikes: campaign.totalLikes || data.totalLikes,
+                likable: campaign.likable || data.likable,
             });
+            const val = mapValues(_.keyBy(campaign.comments, "id"), "comment");
+            setField(val);
         }
     }, [state, data]);
 
@@ -165,11 +200,48 @@ export default function CampaignPublic() {
         createDonation({ campaignId, amount: data.amount }, dispatch);
     };
 
+    const handleComment = () => {
+        // console.log(data.amount);
+        createComment({ campaignId, comment: data.comment }, dispatch);
+    };
+
+    const handleCommentSave = (e) => {
+        const key = e.currentTarget.name;
+        // console.log(field[key]);
+        updateComment(
+            { body: { comment: field[key] }, commentId: key },
+            dispatch
+        );
+    };
+
+    const handleCommentDelete = (e) => {
+        const key = e.currentTarget.name;
+        setAlert({
+            open: true,
+            title: "Warning",
+            contentText: `Are you sure to delete the comment? `,
+            buttonText: "Yes",
+            buttonFn: () => {
+                handleAlertOpen();
+                deleteComment(key, dispatch);
+            },
+            other: {
+                secondaryButtonText: "No",
+                secondaryButtonFn: () => handleAlertOpen(),
+            },
+        });
+    };
+
     const handleChange = (e) => {
         setData({ ...data, [e.target.name]: e.target.value });
     };
 
-    // console.log(data);
+    const handleCommentChange = (e) => {
+        // console.log(e.target.name);
+        setField({ ...field, [e.target.name]: e.target.value });
+    };
+
+    // console.log(state);
     return (
         <>
             <CssBaseline />
@@ -204,8 +276,7 @@ export default function CampaignPublic() {
                         </Typography>
                     </Container>
                 )}
-                {(status.getCampaignSuccess ||
-                    status.createDonationSuccess) && (
+                {status.getCampaignSuccess && (
                     <>
                         <Grid item xs={12} component="h1">
                             <Box mb={2}>{data.name}</Box>
@@ -282,14 +353,12 @@ export default function CampaignPublic() {
                                         </Button>
                                     </Box>
                                 </Box>
-                                <Box
-                                    mt={2}
-                                    height="100%"
-                                    display="flex"
-                                    alignItems="flex-end"
-                                >
-                                    <Box className={classes.interact}>
+                                <Box mt={2} display="flex" flexDirection="row">
+                                    <Box>
                                         <FavoriteBorderTwoToneIcon />
+                                    </Box>
+                                    <Box>{data.totalLikes}</Box>
+                                    <Box px={4}>
                                         <ShareIcon />
                                     </Box>
                                 </Box>
@@ -337,6 +406,7 @@ export default function CampaignPublic() {
                                     <TextField
                                         label="Comments"
                                         name="comment"
+                                        onChange={handleChange}
                                         fullWidth
                                         multiline
                                         rows={3}
@@ -354,11 +424,126 @@ export default function CampaignPublic() {
                                     <Button
                                         color="primary"
                                         className={classes.button}
+                                        onClick={handleComment}
                                         startIcon={<InsertCommentIcon />}
                                     >
                                         Comment
                                     </Button>
                                 </Box>
+                            </Grid>
+                            <Grid item xs={12}>
+                                {data.comments &&
+                                    data.comments.map((comment) => {
+                                        return (
+                                            <div key={comment.id}>
+                                                <Grid
+                                                    container
+                                                    wrap="nowrap"
+                                                    spacing={2}
+                                                >
+                                                    <Grid item>
+                                                        <Avatar
+                                                            alt="Remy Sharp"
+                                                            src={""}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs zeroMinWidth>
+                                                        <h4
+                                                            style={{
+                                                                margin: 0,
+                                                                textAlign:
+                                                                    "left",
+                                                            }}
+                                                        >
+                                                            {comment.user.name}
+                                                        </h4>
+                                                        <TextField
+                                                            id="standard-multiline-static"
+                                                            label=""
+                                                            name={comment.id}
+                                                            fullWidth
+                                                            multiline
+                                                            rows={4}
+                                                            rowsMax={10}
+                                                            onChange={
+                                                                handleCommentChange
+                                                            }
+                                                            value={
+                                                                field[
+                                                                    comment.id
+                                                                ]
+                                                            }
+                                                            variant="outlined"
+                                                            {...getOtherOptions(
+                                                                comment.editable,
+                                                                "text"
+                                                            )}
+                                                        />
+                                                        <p
+                                                            style={{
+                                                                textAlign:
+                                                                    "left",
+                                                                color: "gray",
+                                                            }}
+                                                        >
+                                                            posted{" "}
+                                                            {formatDistance(
+                                                                Date.parse(
+                                                                    comment.createdAt
+                                                                ),
+                                                                new Date(),
+                                                                {
+                                                                    addSuffix: true,
+                                                                }
+                                                            )}
+                                                        </p>
+                                                    </Grid>
+                                                </Grid>
+                                                {comment.editable && (
+                                                    <Grid
+                                                        container
+                                                        justify="flex-end"
+                                                        spacing={2}
+                                                    >
+                                                        <Grid item>
+                                                            <Button
+                                                                name={
+                                                                    comment.id
+                                                                }
+                                                                fullWidth
+                                                                variant="outlined"
+                                                                color="primary"
+                                                                onClick={
+                                                                    handleCommentSave
+                                                                }
+                                                            >
+                                                                Save
+                                                            </Button>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Button
+                                                                name={
+                                                                    comment.id
+                                                                }
+                                                                fullWidth
+                                                                variant="outlined"
+                                                                color="secondary"
+                                                                onClick={
+                                                                    handleCommentDelete
+                                                                }
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </Grid>
+                                                    </Grid>
+                                                )}
+                                                <Divider
+                                                    variant="fullWidth"
+                                                    style={{ margin: "30px 0" }}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                             </Grid>
                         </Grid>
                     </>

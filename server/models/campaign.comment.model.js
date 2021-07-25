@@ -40,7 +40,9 @@ campaignCommentSchema.statics = {
             let campaignComment;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                campaignComment = await this.findById(id).exec();
+                campaignComment = await this.findById(id)
+                    .populate({ path: "userId", select: "name" })
+                    .exec();
             }
             if (campaignComment) {
                 return campaignComment;
@@ -56,6 +58,7 @@ campaignCommentSchema.statics = {
     },
 
     list({ page = 1, perPage = 30, userId, campaignId }) {
+        // console.log("here", campaignId);
         const options = omitBy(
             {
                 userId,
@@ -63,11 +66,13 @@ campaignCommentSchema.statics = {
             },
             isNil
         );
+        // console.log(options);
 
         return this.find(options)
             .sort({ createdAt: -1 })
             .skip(perPage * (page - 1))
             .limit(perPage)
+            .populate({ path: "userId", select: "name" })
             .exec();
     },
     checkDuplicateInsert(error) {
@@ -91,7 +96,7 @@ campaignCommentSchema.statics = {
 };
 
 campaignCommentSchema.method({
-    transform() {
+    transform(user) {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
@@ -103,11 +108,29 @@ campaignCommentSchema.method({
             "updatedAt",
             "createdBy",
             "updatedBy",
+            "editable",
         ];
-        // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
 
-        fields.forEach((field) => {
-            transformed[field] = this[field];
+        // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
+        this["editable"] = false;
+        if (user) {
+            if (user.id === this["userId"]._id.toString())
+                this["editable"] = true;
+        }
+
+        fields.map((field) => {
+            switch (field) {
+                case "userId":
+                    const user = this[field];
+                    transformed["user"] = {
+                        id: user._id,
+                        name: user.name,
+                    };
+                    break;
+                default:
+                    transformed[field] = this[field];
+                    break;
+            }
         });
 
         return transformed;

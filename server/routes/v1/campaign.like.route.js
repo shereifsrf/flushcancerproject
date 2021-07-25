@@ -19,7 +19,7 @@ router
 router
     .route("/:campaignLikeId")
     .get(findAccess(), controller.get)
-    .patch(authorize(LOGGED_USER), controller.update)
+    .patch(authorize(ADMIN), controller.update)
     .delete(authorize(LOGGED_USER), controller.remove);
 
 module.exports = router;
