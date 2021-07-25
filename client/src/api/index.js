@@ -31,6 +31,9 @@ import {
     CREATE_DONATION_IN_PROGRESS,
     CREATE_DONATION_SUCCESS,
     CREATE_DONATION_FAILED,
+    GET_DONATION_LIST_IN_PROGRESS,
+    GET_DONATION_LIST_SUCCESS,
+    GET_DONATION_LIST_FAILED,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -366,6 +369,29 @@ export const getCampaignList = (dashboard, dispatch) => {
         })
         .catch((error) => {
             return handleFailure(error, GET_CAMPAIGN_LIST_FAILED, dispatch);
+        });
+};
+
+export const getDonationList = (dispatch) => {
+    dispatch({ type: GET_DONATION_LIST_IN_PROGRESS });
+
+    instance
+        .get(`donations`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            if (res.status === 200) {
+                // console.log(res.data);
+                return dispatch({
+                    type: GET_DONATION_LIST_SUCCESS,
+                    payload: res.data,
+                });
+            }
+        })
+        .catch((error) => {
+            return handleFailure(error, GET_DONATION_LIST_FAILED, dispatch);
         });
 };
 

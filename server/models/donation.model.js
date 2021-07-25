@@ -40,7 +40,9 @@ donationSchema.statics = {
             let donation;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                donation = await this.findById(id).exec();
+                donation = await this.findById(id)
+                    .populate([{ path: "campaignId", select: "name" }])
+                    .exec();
             }
             if (donation) {
                 return donation;
@@ -83,6 +85,7 @@ donationSchema.statics = {
             .sort({ createdAt: -1 })
             .skip(perPage * (page - 1))
             .limit(perPage)
+            .populate([{ path: "campaignId", select: "name" }])
             .exec();
     },
     checkDuplicateInsert(error) {
@@ -120,10 +123,22 @@ donationSchema.method({
             "amount",
         ];
         // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
-
-        fields.forEach((field) => {
-            transformed[field] = this[field];
+        fields.map((field) => {
+            switch (field) {
+                case "campaignId":
+                    const campaign = this[field];
+                    transformed["campaign"] = {
+                        id: campaign._id,
+                        name: campaign.name,
+                    };
+                    break;
+                default:
+                    transformed[field] = this[field];
+                    break;
+            }
         });
+
+        fields.forEach((field) => {});
 
         return transformed;
     },

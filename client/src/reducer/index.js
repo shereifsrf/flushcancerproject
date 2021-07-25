@@ -31,6 +31,9 @@ import {
     CREATE_DONATION_IN_PROGRESS,
     CREATE_DONATION_SUCCESS,
     CREATE_DONATION_FAILED,
+    GET_DONATION_LIST_IN_PROGRESS,
+    GET_DONATION_LIST_SUCCESS,
+    GET_DONATION_LIST_FAILED,
 } from "../constants";
 
 export const initialState = {
@@ -406,6 +409,41 @@ export const reducer = (state, action) => {
                     createDonationFailed: true,
                 },
             };
+        case GET_DONATION_LIST_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                donations: data,
+                status: {
+                    ...state.status,
+                    ...clearDonationStatus,
+                    getDonationListSuccess: true,
+                },
+            };
+
+        case GET_DONATION_LIST_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                donations: null,
+                status: {
+                    ...state.status,
+                    ...clearDonationStatus,
+                    getDonationListFailed: true,
+                },
+            };
+
+        case GET_DONATION_LIST_IN_PROGRESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearDonationStatus,
+                    getDonationListInProgress: true,
+                },
+            };
         default:
             return state;
     }
@@ -433,6 +471,9 @@ const clearDonationStatus = {
     createDonationSuccess: false,
     createDonationFailed: false,
     createDonationInProgress: false,
+    getDonationListSuccess: false,
+    getDonationListFailed: false,
+    getDonationListInProgress: false,
 };
 
 const clearError = {
