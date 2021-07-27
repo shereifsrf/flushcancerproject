@@ -24,6 +24,12 @@ import { PUBLIC_CAMPAIGNS, CAMPAIGNS_URL } from "../../../constants";
 import LockIcon from "@material-ui/icons/Lock";
 import VerifiedUserIcon from "@material-ui/icons/VerifiedUser";
 import { format } from "date-fns";
+import AlertDialog from "../AlertDialog";
+
+const mode = process.env.NODE_ENV;
+const serverUrl = process.env.SERVER_URL;
+const localUrl = process.env.LOCAL_URL || "http://localhost:5005";
+let url = mode === "production" ? serverUrl : localUrl;
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -70,10 +76,20 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const initAlert = {
+    open: false,
+    title: "",
+    contentText: "",
+    buttonText: "",
+    buttonFn: undefined,
+    other: undefined,
+};
+
 export default function CampaignCard({ campaign, dashboard }) {
     // console.log(campaign);
     const [imgSrc, setImgSrc] = useState("");
     const classes = useStyles();
+    const [alert, setAlert] = useState(initAlert);
     const [expanded, setExpanded] = React.useState(false);
     const progressVal = Math.round(
         ((campaign.totalDonation || 0) / campaign.limit) * 100
@@ -93,9 +109,29 @@ export default function CampaignCard({ campaign, dashboard }) {
         setImgSrc(v);
     }, []);
 
+    const handleShareButton = (e) => {
+        setAlert({
+            open: true,
+            title: `${campaign.name} Link`,
+            contentText: `${url}/${campaign.id}`,
+            buttonText: "Great",
+        });
+    };
+
+    const handleAlertOpen = () => {
+        setAlert((alert) => ({ ...alert, open: !alert.open }));
+    };
     // console.log(campaign);
     return (
         <Card key={campaign.id} className={classes.card}>
+            <AlertDialog
+                open={alert.open}
+                title={alert.title}
+                contentText={alert.contentText}
+                buttonText={alert.buttonText}
+                buttonFn={alert.buttonFn || handleAlertOpen}
+                other={alert.other}
+            />
             <Link
                 to={`${dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS}/${
                     campaign.id
@@ -151,10 +187,11 @@ export default function CampaignCard({ campaign, dashboard }) {
                 </Typography>
             </CardContent>
             <CardActions disableSpacing>
-                <IconButton aria-label="add to favorites">
-                    <FavoriteIcon />
-                </IconButton>
-                <IconButton aria-label="share">
+                <IconButton
+                    aria-label="share"
+                    className={classes.likeButton}
+                    onClick={handleShareButton}
+                >
                     <ShareIcon />
                 </IconButton>
                 <IconButton

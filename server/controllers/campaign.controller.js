@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const { omit, isUndefined, isEmpty } = require("lodash");
+const { omit, isUndefined, isEmpty, omitBy, isNil } = require("lodash");
 const {
     ADMIN,
     ADMIN_ONLY_REPLACABLE_CAMPAIGN_FDS,
@@ -9,9 +9,8 @@ const {
 const Campaign = require("../models/campaign.model");
 const CampaignComment = require("../models/campaign.comment.model");
 const User = require("../models/user.model");
-const CampaignLike = require("../models/campaign.like.model");
 const mongoose = require("mongoose");
-const Donation = require("../models/donation.model");
+const CampaignRating = require("../models/campaign.rating.model");
 
 /**
  * Load user and append to req.
@@ -149,10 +148,53 @@ exports.get = async (req, res) => {
     res.send({ ...result[0], comments: result[1] });
 };
 
+exports.getRating = async (req, res) => {
+    //get rating details of the campaign
+    const campaignId = req.locals.campaign.id;
+    const userInCharge = req.user;
+
+    const result = await Promise.all([
+        getAvgRating(campaignId),
+        findRatable(
+            campaignId,
+            !isEmpty(userInCharge) ? userInCharge : undefined
+        ),
+    ]);
+
+    const rating = !isEmpty(result[0][0]) ? result[0][0].rating : 0;
+    const ratable = !isEmpty(result[1]) ? false : true;
+    res.send({ rating, ratable });
+};
+
 const getComments = async (user, query) => {
     const comments = await CampaignComment.list(query);
     // console.log(comments);
     return await Promise.all(
         comments.map((comment) => comment.transform(user))
+    );
+};
+
+const getAvgRating = (exports.getAvgRating = async (campaignId) => {
+    return await CampaignRating.aggregate([
+        {
+            $match: {
+                campaignId: mongoose.Types.ObjectId(campaignId),
+            },
+        },
+        {
+            $group: {
+                _id: "none",
+                rating: { $avg: "$star" },
+            },
+        },
+    ]);
+});
+
+const findRatable = async (campaignId, userId) => {
+    return await CampaignRating.findOne(
+        {
+            ...omitBy({ campaignId, userId }, isNil),
+        },
+        "_id"
     );
 };

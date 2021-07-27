@@ -45,10 +45,22 @@ import {
     DELETE_COMMENT_FAILED,
     DELETE_LIKE_FAILED,
     DELETE_LIKE_SUCCESS,
-    DELETE_LIKE_IN_PROGRESS,
     CREATE_LIKE_FAILED,
     CREATE_LIKE_SUCCESS,
-    CREATE_LIKE_IN_PROGRESS,
+    CREATE_REPORTING_SUCCESS,
+    CREATE_REPORTING_FAILED,
+    GET_RATING_SUCCESS,
+    GET_RATING_FAILED,
+    CREATE_RATING_FAILED,
+    CREATE_RATING_SUCCESS,
+    UPDATE_PROFILE_SUCCESS,
+    UPDATE_PROFILE_FAILED,
+    GET_PROOF_LIST_SUCCESS,
+    GET_PROOF_LIST_FAILED,
+    CREATE_PROOF_SUCCESS,
+    CREATE_PROOF_FAILED,
+    DELETE_PROOF_FAILED,
+    DELETE_PROOF_SUCCESS,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -489,13 +501,11 @@ export const getDonationList = (dispatch) => {
         });
 };
 
-export const createLike = (body, dispatch) => {
-    dispatch({ type: CREATE_LIKE_IN_PROGRESS });
-
+export const createLike = (campaignId, dispatch) => {
     instance
         .post(
-            `campaigncomments`,
-            { ...body },
+            `campaignlikes`,
+            { campaignId },
             {
                 headers: {
                     Authorization: `Bearer ${
@@ -508,6 +518,7 @@ export const createLike = (body, dispatch) => {
             // if (res.status === 200) {
             dispatch({
                 type: CREATE_LIKE_SUCCESS,
+                payload: res.data,
             });
             // }
         })
@@ -516,9 +527,7 @@ export const createLike = (body, dispatch) => {
         });
 };
 
-export const deletelike = (likeId, dispatch) => {
-    dispatch({ type: DELETE_LIKE_IN_PROGRESS });
-
+export const deleteLike = (likeId, dispatch) => {
     instance
         .delete(`campaignlikes/${likeId}`, {
             headers: {
@@ -526,15 +535,165 @@ export const deletelike = (likeId, dispatch) => {
             },
         })
         .then((res) => {
-            if (res.status === 200) {
-                // console.log(res.data.document);
-                return dispatch({
-                    type: DELETE_LIKE_SUCCESS,
-                });
-            }
+            // console.log(res.data.document);
+            return dispatch({
+                type: DELETE_LIKE_SUCCESS,
+            });
         })
         .catch((error) => {
             return handleFailure(error, DELETE_LIKE_FAILED, dispatch);
+        });
+};
+
+export const createReporting = ({ campaignId, message }, dispatch) => {
+    instance
+        .post(
+            `campaignreportings`,
+            { campaignId, message },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_REPORTING_SUCCESS,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_REPORTING_FAILED, dispatch);
+        });
+};
+
+export const createRating = ({ campaignId, star }, dispatch) => {
+    instance
+        .post(
+            `campaignratings`,
+            { campaignId, star },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_RATING_SUCCESS,
+                payload: res.data,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_RATING_FAILED, dispatch);
+        });
+};
+
+export const getRating = (campaignId, dispatch) => {
+    instance
+        .get(`campaigns/${campaignId}/rating`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            return dispatch({
+                type: GET_RATING_SUCCESS,
+                payload: res.data,
+            });
+        })
+        .catch((error) => {
+            return handleFailure(error, GET_RATING_FAILED, dispatch);
+        });
+};
+
+export const updateProfile = ({ userId, body }, dispatch) => {
+    instance
+        .patch(
+            `users/${userId}`,
+            { ...body },
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        getLocalStorage().token.accessToken
+                    }`,
+                },
+            }
+        )
+        .then((res) => {
+            dispatch({
+                type: UPDATE_PROFILE_SUCCESS,
+                payload: res.data,
+            });
+        })
+        .catch((error) => {
+            return handleFailure(error, UPDATE_PROFILE_FAILED, dispatch);
+        });
+};
+
+export const getProofList = (campaignId, dispatch) => {
+    instance
+        .get(`campaignproofs?campaignId=${campaignId}`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            return dispatch({
+                type: GET_PROOF_LIST_SUCCESS,
+                payload: res.data,
+            });
+        })
+        .catch((error) => {
+            return handleFailure(error, GET_PROOF_LIST_FAILED, dispatch);
+        });
+};
+
+export const deleteProof = (proofId, dispatch) => {
+    instance
+        .delete(`campaignproofs/${proofId}`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            return dispatch({
+                type: DELETE_PROOF_SUCCESS,
+            });
+        })
+        .catch((error) => {
+            return handleFailure(error, DELETE_PROOF_FAILED, dispatch);
+        });
+};
+
+export const createProof = (campaignId, document, dispatch) => {
+    const formData = new FormData();
+    formData.append("document", document);
+    formData.append("campaignId", campaignId);
+
+    instance
+        .post(`campaignproofs`, formData, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            // if (res.status === 200) {
+            dispatch({
+                type: CREATE_PROOF_SUCCESS,
+                payload: res.data,
+            });
+            // }
+        })
+        .catch((error) => {
+            return handleFailure(error, CREATE_PROOF_FAILED, dispatch);
         });
 };
 

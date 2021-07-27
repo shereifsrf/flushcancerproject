@@ -152,7 +152,7 @@ campaignSchema.method({
                 "categoryId",
                 "name",
                 "description",
-                // "document",
+                "document",
                 "limit",
                 "createdAt",
                 "updatedAt",
@@ -177,6 +177,7 @@ campaignSchema.method({
             let totalDonation = 0;
             let totalLikes = 0;
             let likable = true;
+            let likeId = undefined;
 
             await Promise.all([
                 getTotalDonation(this["id"]).then(
@@ -190,14 +191,17 @@ campaignSchema.method({
                         (totalLikes = !isEmpty(res) ? res[0].totalLikes : 0)
                 ),
 
-                CampaignLike.countDocuments(
+                CampaignLike.findOne(
                     {
                         campaignId: this["id"],
                         userId: user.id,
                     },
-                    function (err, count) {
-                        if (!err && count !== 0) {
+                    "_id",
+                    function (err, like) {
+                        // console.log(like);
+                        if (!err && like) {
                             likable = false;
+                            likeId = like._id;
                         }
                     }
                 ),
@@ -283,7 +287,7 @@ campaignSchema.method({
 
             transformed["totalDonation"] = totalDonation;
             transformed["totalLikes"] = totalLikes;
-            transformed["likable"] = likable;
+            transformed["like"] = { likable, likeId };
             // console.log(transformed);
             return transformed;
         } catch (e) {

@@ -20,9 +20,9 @@ exports.load = async (req, res, next, id) => {
 exports.create = async (req, res, next) => {
     try {
         if (req.user.role !== ADMIN || isUndefined(req.body.userId))
-            req.body.userId = req.user._id;
+            req.body.userId = req.user.id;
 
-        req.body.createdBy = req.user._id;
+        req.body.createdBy = req.user.id;
         const campaignLike = new CampaignLike(req.body);
         const savedCampaignLike = await campaignLike.save();
         res.status(httpStatus.CREATED);

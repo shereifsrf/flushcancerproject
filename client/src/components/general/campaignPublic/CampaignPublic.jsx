@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
     CssBaseline,
     Box,
@@ -9,29 +9,37 @@ import {
     InputLabel,
     FormControl,
     Button,
-    Link,
     Typography,
     Divider,
     TextField,
     Avatar,
+    IconButton,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import BG from "../../../images/island1.jpg";
 import FavoriteBorderTwoToneIcon from "@material-ui/icons/FavoriteBorderTwoTone";
 import ShareIcon from "@material-ui/icons/Share";
-import { campaigns } from "../../../dummyData";
-import { Link as RouterLink, useParams } from "react-router-dom";
-import { limitCharWithDots } from "../../../util";
+import { useParams } from "react-router-dom";
 import { useAuthContext } from "../../AuthProvider";
-import { getCampaign, createDonation, createComment } from "Api";
 import { useEffect } from "react";
-import { isEmpty, mapValues } from "lodash";
+import { isEmpty, mapValues, set } from "lodash";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { Buffer } from "buffer";
-import { add, addMonths, format, formatDistance, subDays } from "date-fns";
+import { addMonths, format, formatDistance } from "date-fns";
 import InsertCommentIcon from "@material-ui/icons/InsertComment";
 import AlertDialog from "../AlertDialog";
-import { deleteComment, updateComment } from "../../../api";
+import {
+    deleteComment,
+    updateComment,
+    getCampaign,
+    createDonation,
+    createComment,
+    createLike,
+    deleteLike,
+} from "../../../api";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import { PUBLIC_CAMPAIGNS } from "../../../constants";
+import CampaignReport from "./CampaignReporting";
+import CampaignRating from "./CampaignRating";
 
 const getOtherOptions = (isEditable, element) => {
     let result = {};
@@ -71,6 +79,9 @@ const useStyles = makeStyles((theme) => ({
     button: {
         backgroundColor: "#FFF",
     },
+    likeButton: {
+        padding: theme.spacing(0),
+    },
 }));
 
 const initAlert = {
@@ -98,12 +109,18 @@ const initData = {
     amount: 0,
     comments: null,
     comment: "",
-    likable: false,
-    totalLikes: 0,
+};
+
+const initLike = {
+    inProgress: false,
+    id: undefined,
+    likable: true,
+    total: 0,
 };
 
 export default function CampaignPublic() {
     const [data, setData] = useState(initData);
+    const [like, setLike] = useState(initLike);
     const [field, setField] = useState(initField);
     const [alert, setAlert] = useState(initAlert);
     const { campaignId } = useParams();
@@ -121,6 +138,26 @@ export default function CampaignPublic() {
     }, [campaignId]);
 
     useLayoutEffect(() => {
+        if (status.createLikeSuccess) {
+            setLike({
+                ...like,
+                inProgress: false,
+                likable: false,
+                id: state.like.id,
+                total: ++like.total,
+            });
+        } else if (status.deleteLikeSuccess) {
+            setLike({
+                ...like,
+                inProgress: false,
+                likable: true,
+                id: undefined,
+                total: --like.total,
+            });
+        }
+    }, [state]);
+
+    useLayoutEffect(() => {
         if (!alert.open) {
             if (state.hasError) {
                 // console.log("im here");
@@ -132,14 +169,14 @@ export default function CampaignPublic() {
                     buttonText: "Alright",
                 });
             } else if (status.createDonationSuccess) {
-                setData({ ...data, isUnloaded: true });
-                getCampaignData();
                 setAlert({
                     open: true,
                     title: "Donation Status",
                     contentText: `Successfully donated ${state.donation.amount}`,
                     buttonText: "Great",
                 });
+                setData({ ...data, isUnloaded: true });
+                getCampaignData();
             } else if (
                 status.createCommentSuccess ||
                 status.updateCommentSuccess ||
@@ -183,11 +220,17 @@ export default function CampaignPublic() {
                 user: campaign.user || data.user,
                 totalDonation: campaign.totalDonation || 0,
                 comments: campaign.comments || data.comments,
-                totalLikes: campaign.totalLikes || data.totalLikes,
-                likable: campaign.likable || data.likable,
             });
             const val = mapValues(_.keyBy(campaign.comments, "id"), "comment");
             setField(val);
+            // console.log(campaign.like.likable || like.likable);
+            // console.log(campaign.like.likable);
+            setLike({
+                ...like,
+                likable: campaign.like.likable,
+                id: campaign.like.likeId || like.id,
+                total: campaign.totalLikes || data.totalLikes,
+            });
         }
     }, [state, data]);
 
@@ -241,7 +284,23 @@ export default function CampaignPublic() {
         setField({ ...field, [e.target.name]: e.target.value });
     };
 
-    // console.log(state);
+    const handleLikeButton = (e) => {
+        if (like.likable) {
+            createLike(campaignId, dispatch);
+        } else if (!like.likable) {
+            deleteLike(like.id, dispatch);
+        }
+    };
+
+    const handleShareButton = (e) => {
+        setAlert({
+            open: true,
+            title: `${data.name} Link`,
+            contentText: `${window.location.href}`,
+            buttonText: "Great",
+        });
+    };
+    // console.log(like);
     return (
         <>
             <CssBaseline />
@@ -355,17 +414,46 @@ export default function CampaignPublic() {
                                 </Box>
                                 <Box mt={2} display="flex" flexDirection="row">
                                     <Box>
-                                        <FavoriteBorderTwoToneIcon />
+                                        {!like.inProgress && (
+                                            <IconButton
+                                                className={classes.likeButton}
+                                                onClick={handleLikeButton}
+                                            >
+                                                {like.likable && (
+                                                    <FavoriteBorderTwoToneIcon />
+                                                )}
+                                                {!like.likable && (
+                                                    <FavoriteIcon />
+                                                )}
+                                            </IconButton>
+                                        )}
+                                        {like.inProgress && (
+                                            <Box>
+                                                <CircularProgress size={20} />
+                                            </Box>
+                                        )}
                                     </Box>
-                                    <Box>{data.totalLikes}</Box>
+                                    <Box ml={1}>{like.total}</Box>
                                     <Box px={4}>
-                                        <ShareIcon />
+                                        <IconButton
+                                            className={classes.likeButton}
+                                            onClick={handleShareButton}
+                                        >
+                                            <ShareIcon />
+                                        </IconButton>
                                     </Box>
+                                </Box>
+                                <Box mt={1}>
+                                    <CampaignRating campaignId={campaignId} />
                                 </Box>
                             </Grid>
                         </Grid>
                         <Grid container className={classes.bottomSec}>
-                            <Grid container spacing={2} justify="space-between">
+                            <Grid
+                                container
+                                spacing={2}
+                                justifyContent="space-between"
+                            >
                                 <Grid item>
                                     <Typography
                                         variant="subtitle1"
@@ -464,7 +552,7 @@ export default function CampaignPublic() {
                                                             fullWidth
                                                             multiline
                                                             rows={4}
-                                                            rowsMax={10}
+                                                            maxRows={10}
                                                             onChange={
                                                                 handleCommentChange
                                                             }
@@ -502,7 +590,7 @@ export default function CampaignPublic() {
                                                 {comment.editable && (
                                                     <Grid
                                                         container
-                                                        justify="flex-end"
+                                                        justifyContent="flex-end"
                                                         spacing={2}
                                                     >
                                                         <Grid item>
@@ -544,6 +632,13 @@ export default function CampaignPublic() {
                                             </div>
                                         );
                                     })}
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <CampaignReport
+                                    campaignId={campaignId}
+                                    campaign={data}
+                                />
                             </Grid>
                         </Grid>
                     </>

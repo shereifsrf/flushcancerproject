@@ -3,17 +3,21 @@ const { isNil, omitBy } = require("lodash");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
 
-const campaignLikeSchema = new mongoose.Schema(
+const campaignProofSchema = new mongoose.Schema(
     {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
         campaignId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Campaign",
             required: true,
+        },
+        isChecked: {
+            type: Boolean,
+            default: false,
+            required: true,
+        },
+        document: {
+            data: Buffer,
+            contentType: String,
         },
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -24,27 +28,31 @@ const campaignLikeSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
+        remark: {
+            type: String,
+        },
     },
     {
         timestamps: true,
     }
 );
-campaignLikeSchema.index({ userId: 1, campaignId: 1 }, { unique: true });
 
-campaignLikeSchema.statics = {
+campaignProofSchema.statics = {
     async get(id) {
         try {
-            let campaignLike;
+            let campaignProof;
 
             if (mongoose.Types.ObjectId.isValid(id)) {
-                campaignLike = await this.findById(id).exec();
+                campaignProof = await this.findById(id)
+                    .populate("campaignId", "userId")
+                    .exec();
             }
-            if (campaignLike) {
-                return campaignLike;
+            if (campaignProof) {
+                return campaignProof;
             }
 
             throw new APIError({
-                message: "CampaignLike does not exist",
+                message: "CampaignProof does not exist",
                 status: httpStatus.NOT_FOUND,
             });
         } catch (error) {
@@ -52,27 +60,15 @@ campaignLikeSchema.statics = {
         }
     },
 
-    list({
-        page = 1,
-        perPage = 30,
-        userId,
-        campaignId,
-        updatedBy,
-        createdBy,
-        updatedAt,
-        createdAt,
-    }) {
+    list({ page = 1, perPage = 30, campaignId }) {
+        // console.log("here", campaignId);
         const options = omitBy(
             {
-                userId,
                 campaignId,
-                updatedBy,
-                createdBy,
-                updatedAt,
-                createdAt,
             },
             isNil
         );
+        // console.log(options);
 
         return this.find(options)
             .sort({ createdAt: -1 })
@@ -80,48 +76,37 @@ campaignLikeSchema.statics = {
             .limit(perPage)
             .exec();
     },
-    checkDuplicateInsert(error) {
-        if (error.name === "MongoError" && error.code === 11000) {
-            return new APIError({
-                message: "Validation Error",
-                errors: [
-                    {
-                        field: "user and campaign",
-                        location: "body",
-                        messages: ["already liked"],
-                    },
-                ],
-                status: httpStatus.CONFLICT,
-                isPublic: true,
-                stack: error.stack,
-            });
-        }
-        return error;
-    },
 };
 
-campaignLikeSchema.method({
-    transform() {
+campaignProofSchema.method({
+    transform(user) {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
             "id",
-            "userId",
             "campaignId",
+            "remark",
             "createdAt",
             "updatedAt",
             "createdBy",
+            "isChecked",
+            "document",
             "updatedBy",
         ];
+
         // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
 
-        fields.forEach((field) => {
-            transformed[field] = this[field];
+        fields.map((field) => {
+            switch (field) {
+                default:
+                    transformed[field] = this[field];
+                    break;
+            }
         });
 
         return transformed;
     },
 });
 
-const CampaignLike = mongoose.model("CampaignLike", campaignLikeSchema);
-module.exports = CampaignLike;
+const CampaignProof = mongoose.model("CampaignProof", campaignProofSchema);
+module.exports = CampaignProof;
