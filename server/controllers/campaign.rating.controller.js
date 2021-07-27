@@ -1,7 +1,8 @@
 const httpStatus = require("http-status");
-const { omit, isUndefined } = require("lodash");
+const { omit, isUndefined, isEmpty } = require("lodash");
 const { ADMIN } = require("../config/constants");
 const CampaignRating = require("../models/campaign.rating.model");
+const { getAvgRating } = require("./campaign.controller");
 
 /**
  * Load user and append to req.
@@ -25,8 +26,15 @@ exports.create = async (req, res, next) => {
         req.body.createdBy = req.user._id;
         const campaignRating = new CampaignRating(req.body);
         const savedCampaignRating = await campaignRating.save();
+        const ratingRes = await getAvgRating(req.body.campaignId);
+        const rating = !isEmpty(ratingRes[0]) ? ratingRes[0].rating : 0;
+
         res.status(httpStatus.CREATED);
-        res.json(savedCampaignRating.transform());
+        console.log(rating);
+        res.json({
+            ...savedCampaignRating.transform(),
+            rating,
+        });
     } catch (error) {
         next(CampaignRating.checkDuplicateInsert(error));
     }

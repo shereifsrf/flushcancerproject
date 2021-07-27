@@ -61,6 +61,9 @@ const handleJWT = (req, res, next, roles) => async (err, user, info) => {
                         (!isUndefined(req.locals.campaignReporting) &&
                             req.locals.campaignReporting.userId.toString() !==
                                 user._id.toString()) ||
+                        (!isUndefined(req.locals.campaignProof) &&
+                            req.locals.campaignProof.campaignId.userId.toString() !==
+                                user._id.toString()) ||
                         (!isUndefined(req.locals.donation) &&
                             req.locals.donation.userId.toString() !==
                                 user._id.toString())))

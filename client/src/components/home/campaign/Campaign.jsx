@@ -41,6 +41,7 @@ import { useRef } from "react";
 import { CAMPAIGNS_URL, DASHBOARD_URL } from "../../../constants";
 import AlertDialog from "../../general/AlertDialog";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ProofDocument from "./ProofDocument";
 
 const useStyles = makeStyles((theme) => ({
     divider: {
@@ -142,7 +143,7 @@ export default function Campaign() {
     useLayoutEffect(() => {
         if (!alert.open) {
             if (state.hasError) {
-                console.log("im here");
+                // console.log("im here");
                 setAlert({
                     open: true,
                     title: "Error encountered",
@@ -513,28 +514,8 @@ export default function Campaign() {
                                     </FormControl>
                                 </div>
                                 <Divider className={classes.divider} />
-                                {isEditable() && data.isVerifyDocument && (
-                                    <div>
-                                        <input
-                                            accept="image/*"
-                                            className={classes.input}
-                                            id="label-campaign-proof"
-                                            multiple
-                                            type="file"
-                                        />
-                                        <label htmlFor="label-campaign-proof">
-                                            <Button
-                                                variant="contained"
-                                                color="default"
-                                                className={classes.button}
-                                                startIcon={<CloudUpload />}
-                                                component="span"
-                                                // fullWidth
-                                            >
-                                                Upload Campaign Proof Documents
-                                            </Button>
-                                        </label>
-                                    </div>
+                                {!isCreate && data.isVerifyDocument && (
+                                    <ProofDocument campaignId={campaignId} />
                                 )}
                                 {isEditable() && (
                                     <Grid container justify="space-between">

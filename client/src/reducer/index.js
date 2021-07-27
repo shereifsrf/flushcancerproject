@@ -45,10 +45,22 @@ import {
     DELETE_COMMENT_FAILED,
     DELETE_LIKE_FAILED,
     DELETE_LIKE_SUCCESS,
-    DELETE_LIKE_IN_PROGRESS,
     CREATE_LIKE_FAILED,
     CREATE_LIKE_SUCCESS,
-    CREATE_LIKE_IN_PROGRESS,
+    CREATE_REPORTING_SUCCESS,
+    CREATE_REPORTING_FAILED,
+    GET_RATING_SUCCESS,
+    GET_RATING_FAILED,
+    CREATE_RATING_FAILED,
+    CREATE_RATING_SUCCESS,
+    UPDATE_PROFILE_SUCCESS,
+    UPDATE_PROFILE_FAILED,
+    GET_PROOF_LIST_SUCCESS,
+    GET_PROOF_LIST_FAILED,
+    CREATE_PROOF_SUCCESS,
+    CREATE_PROOF_FAILED,
+    DELETE_PROOF_FAILED,
+    DELETE_PROOF_SUCCESS,
 } from "../constants";
 
 export const initialState = {
@@ -62,6 +74,11 @@ export const initialState = {
         ...clearAuthStatus,
         ...clearDonationStatus,
         ...clearCommentStatus,
+        ...clearReportingStatus,
+        ...clearRatingStatus,
+        ...clearProfileStatus,
+        ...clearLikeStatus,
+        ...clearProofStatus,
         getCategoryListSuccess: false,
         getCategoryListFailed: false,
         getCategoryListInProgress: false,
@@ -151,7 +168,6 @@ export const reducer = (state, action) => {
                 ...state,
                 isAuthenticated: false,
                 hasError: true,
-                message: data.message,
                 status: {
                     ...state.status,
                     ...clearAuthStatus,
@@ -178,6 +194,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     getCampaignSuccess: true,
                     getCampaignFailed: false,
                     getCampaignInProgress: false,
@@ -192,6 +209,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     getCampaignSuccess: false,
                     getCampaignFailed: true,
                     getCampaignInProgress: false,
@@ -204,6 +222,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     getCampaignSuccess: false,
                     getCampaignFailed: false,
                     getCampaignInProgress: true,
@@ -403,6 +422,7 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearCampaignStatus,
                     ...clearDonationStatus,
+                    ...clearLikeStatus,
                     createDonationSuccess: true,
                 },
             };
@@ -415,6 +435,7 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearCampaignStatus,
                     ...clearDonationStatus,
+                    ...clearLikeStatus,
                     createDonationInProgress: true,
                 },
             };
@@ -428,6 +449,7 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearCampaignStatus,
                     ...clearDonationStatus,
+                    ...clearLikeStatus,
                     createDonationFailed: true,
                 },
             };
@@ -473,6 +495,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     createCommentSuccess: true,
                 },
             };
@@ -484,6 +507,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     createCommentInProgress: true,
                 },
             };
@@ -496,6 +520,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     createCommentFailed: true,
                 },
             };
@@ -507,6 +532,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     updateCommentSuccess: true,
                 },
             };
@@ -518,6 +544,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     updateCommentInProgress: true,
                 },
             };
@@ -530,6 +557,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     updateCommentFailed: true,
                 },
             };
@@ -540,6 +568,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     deleteCommentSuccess: true,
                 },
             };
@@ -551,6 +580,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     deleteCommentInProgress: true,
                 },
             };
@@ -563,6 +593,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearLikeStatus,
                     deleteCommentFailed: true,
                 },
             };
@@ -575,17 +606,6 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearLikeStatus,
                     deleteLikeSuccess: true,
-                },
-            };
-
-        case DELETE_LIKE_IN_PROGRESS:
-            return {
-                ...state,
-                ...clearError,
-                status: {
-                    ...state.status,
-                    ...clearLikeStatus,
-                    deleteLikeInProgress: true,
                 },
             };
 
@@ -605,21 +625,11 @@ export const reducer = (state, action) => {
             return {
                 ...state,
                 ...clearError,
+                like: data,
                 status: {
                     ...state.status,
                     ...clearLikeStatus,
                     createLikeSuccess: true,
-                },
-            };
-
-        case CREATE_LIKE_IN_PROGRESS:
-            return {
-                ...state,
-                ...clearError,
-                status: {
-                    ...state.status,
-                    ...clearLikeStatus,
-                    createLikeInProgress: true,
                 },
             };
 
@@ -632,6 +642,172 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearLikeStatus,
                     createLikeFailed: true,
+                },
+            };
+
+        case CREATE_REPORTING_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearReportingStatus,
+                    createReportingSuccess: true,
+                },
+            };
+
+        case CREATE_REPORTING_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearReportingStatus,
+                    createReportingFailed: true,
+                },
+            };
+
+        case CREATE_RATING_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                rating: data,
+                status: {
+                    ...state.status,
+                    ...clearRatingStatus,
+                    createRatingSuccess: true,
+                },
+            };
+
+        case CREATE_RATING_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearRatingStatus,
+                    createRatingFailed: true,
+                },
+            };
+
+        case GET_RATING_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                rating: data,
+                status: {
+                    ...state.status,
+                    ...clearRatingStatus,
+                    getRatingSuccess: true,
+                },
+            };
+
+        case GET_RATING_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearRatingStatus,
+                    getRatingFailed: true,
+                },
+            };
+
+        case UPDATE_PROFILE_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                user: data,
+                status: {
+                    ...state.status,
+                    ...clearProfileStatus,
+                    updateProfileSuccess: true,
+                },
+            };
+
+        case UPDATE_PROFILE_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearProfileStatus,
+                    updateProfileFailed: true,
+                },
+            };
+
+        case GET_PROOF_LIST_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                proofs: data,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    getProofListSuccess: true,
+                },
+            };
+
+        case GET_PROOF_LIST_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    getProofListFailed: true,
+                },
+            };
+
+        case CREATE_PROOF_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                proof: data,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    createProofSuccess: true,
+                },
+            };
+
+        case CREATE_PROOF_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    createProofFailed: true,
+                },
+            };
+
+        case DELETE_PROOF_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    deleteProofSuccess: true,
+                },
+            };
+
+        case DELETE_PROOF_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearProofStatus,
+                    deleteProofFailed: true,
                 },
             };
         default:
@@ -693,8 +869,32 @@ const clearCommentStatus = {
 const clearLikeStatus = {
     createLikeSuccess: false,
     createLikeFailed: false,
-    createLikeInProgress: false,
     deleteLikeSuccess: false,
     deleteLikeFailed: false,
-    deleteLikeInProgress: false,
+};
+
+const clearReportingStatus = {
+    createReportingSuccess: false,
+    createReportingFailed: false,
+};
+
+const clearRatingStatus = {
+    createRatingSuccess: false,
+    createRatingFailed: false,
+    getRatingSuccess: false,
+    getRatingFailed: false,
+};
+
+const clearProfileStatus = {
+    updateProfileSuccess: false,
+    updateProfileFailed: false,
+};
+
+const clearProofStatus = {
+    getProofListSuccess: false,
+    getProofListFailed: false,
+    createProofSuccess: false,
+    createProofFailed: false,
+    deleteProofSuccess: false,
+    deleteProofFailed: false,
 };
