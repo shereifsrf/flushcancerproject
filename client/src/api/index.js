@@ -186,6 +186,7 @@ export const userLogin = (data, dispatch) => {
         })
         .then((res) => {
             if (res.status === 200) {
+                setLocalStorage({ user: res.data.user, token: res.data.token });
                 return dispatch({
                     type: USER_LOGIN_SUCCESS,
                     payload: res.data,
