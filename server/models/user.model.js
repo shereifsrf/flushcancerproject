@@ -58,8 +58,8 @@ const userSchema = new mongoose.Schema(
         },
         rating: {
             type: Number,
+            default: 0,
             required: true,
-            defaut: 0,
         },
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
@@ -232,14 +232,7 @@ userSchema.statics = {
     checkDuplicateEmail(error) {
         if (error.name === "MongoError" && error.code === 11000) {
             return new APIError({
-                message: "Validation Error",
-                errors: [
-                    {
-                        field: "email",
-                        location: "body",
-                        messages: ['"email" already exists'],
-                    },
-                ],
+                message: '"email" already exists',
                 status: httpStatus.CONFLICT,
                 isPublic: true,
                 stack: error.stack,

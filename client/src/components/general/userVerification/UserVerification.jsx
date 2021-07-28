@@ -4,9 +4,10 @@ import { initState, userVerify } from "Api";
 import { useAuthContext } from "../../AuthProvider";
 import AlertDialog from "../AlertDialog";
 import { Redirect } from "react-router-dom";
+import { DASHBOARD_URL } from "../../../constants";
 
 export default function UserVerification() {
-    const { dispatch, state } = useAuthContext();
+    const { state, dispatch } = useAuthContext();
     const { refreshToken } = useParams();
     const history = useHistory();
 
@@ -31,7 +32,7 @@ export default function UserVerification() {
                 />
             )}
             {state.status.userAuthSuccess && state.isAuthenticated && (
-                <Redirect to="/home" />
+                <Redirect to={`/${DASHBOARD_URL}`} />
             )}
         </>
     );

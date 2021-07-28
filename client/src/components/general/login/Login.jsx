@@ -37,7 +37,7 @@ const initData = {
     confPassword: "",
     showPassword: false,
     errorMessage: null,
-    inProgress: true,
+    inProgress: false,
 };
 
 const initAlert = {
@@ -64,19 +64,30 @@ const Login = () => {
     const status = state.status;
 
     useLayoutEffect(() => {
-        if (
-            !state.isAuthenticated &&
-            !status.autoAuthenticateUserInProgress &&
-            !status.autoAuthenticateUserFailed &&
-            !status.autoAuthenticateUserFailedNoLocals
-        ) {
+        if (!isSignUp) {
             autoAuthenticateUser(dispatch);
         }
-    }, [state]);
+    }, []);
 
-    useEffect(() => {
-        if (state.isAuthenticated) history.replace(redirectTo.current);
-        else if (status.autoAuthenticateUserFailed) {
+    useLayoutEffect(() => {
+        console.log(state);
+        if (status.userRegisterSuccess && data.inProgress) {
+            setAlert({
+                open: true,
+                title: "Registration Success",
+                contentText: "Please check your email for verification",
+                buttonText: "Alright",
+            });
+            setData({ ...initData, inProgress: false });
+        } else if (state.isAuthenticated) {
+            history.replace(redirectTo.current);
+        } else if (
+            state.hasError &&
+            !(
+                status.autoAuthenticateUserFailed ||
+                status.autoAuthenticateUserFailedNoLocals
+            )
+        ) {
             if (!alert.open) {
                 setAlert({
                     open: true,
@@ -86,12 +97,11 @@ const Login = () => {
                 });
             }
             setData({ ...data, inProgress: false });
-        } else if (state.hasError) {
-            setData({
-                ...data,
-                inProgress: false,
-                errorMessage: state.message,
-            });
+        } else if (
+            status.autoAuthenticateUserFailed ||
+            status.autoAuthenticateUserFailedNoLocals
+        ) {
+            setData({ ...data, inProgress: false });
         }
     }, [state]);
 
@@ -103,6 +113,7 @@ const Login = () => {
         e.preventDefault();
         setData({
             ...data,
+            inProgress: true,
         });
 
         if (isSignUp) {
@@ -233,11 +244,13 @@ const Login = () => {
                             >
                                 {action}
                             </Button>
-                            <Box mb={2} color="secondary.main">
-                                {data.errorMessage && (
-                                    <div>{data.errorMessage}</div>
-                                )}
-                            </Box>
+                            {!isSignUp && (
+                                <Box mb={2} color="secondary.main">
+                                    {data.errorMessage && (
+                                        <div>{data.errorMessage}</div>
+                                    )}
+                                </Box>
+                            )}
                         </form>
                     </div>
                 )}

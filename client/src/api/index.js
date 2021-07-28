@@ -163,12 +163,13 @@ const refreshToken = (localStorageItems, dispatch) => {
 };
 
 export const userVerify = (data, dispatch) => {
-    axios
-        .post(`${url}/api/v1/auth/verify-user`, {
+    instance
+        .post(`auth/verify-user`, {
             refreshToken: data.refreshToken,
         })
         .then((res) => {
             if (res.status === 200) {
+                setLocalStorage({ user: res.data.user, token: res.data.token });
                 dispatch({ type: USER_LOGIN_SUCCESS, payload: res.data });
             }
         })
@@ -207,7 +208,6 @@ export const userRegister = (data, dispatch) => {
             if (res.status === 200) {
                 dispatch({
                     type: USER_REGISTRATION_SUCCESS,
-                    payload: { message: res.data },
                 });
             }
         })

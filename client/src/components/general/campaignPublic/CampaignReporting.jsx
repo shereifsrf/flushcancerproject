@@ -30,7 +30,7 @@ export default function CampaignReport({ campaignId, campaign }) {
         if (reporting.loading) {
             if (status.createReportingSuccess) {
                 setReporting(initReporting);
-                console.log("herer");
+                // console.log("herer");
                 if (!alert.open) {
                     setAlert({
                         open: true,

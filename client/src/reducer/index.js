@@ -1,7 +1,6 @@
 import {
     USER_LOGIN_SUCCESS,
     USER_LOGIN_FAILED,
-    USER_LOGIN_IN_PROGRESS,
     USER_LOGOUT,
     USER_REGISTRATION_SUCCESS,
     USER_REGISTRATION_FAILED,
@@ -79,6 +78,7 @@ export const initialState = {
         ...clearProfileStatus,
         ...clearLikeStatus,
         ...clearProofStatus,
+        ...clearAccountStatus,
         getCategoryListSuccess: false,
         getCategoryListFailed: false,
         getCategoryListInProgress: false,
@@ -94,9 +94,6 @@ export const reducer = (state, action) => {
             return { ...initialState };
 
         case USER_LOGIN_SUCCESS:
-            localStorage.setItem("user", JSON.stringify(data.user));
-            localStorage.setItem("token", JSON.stringify(data.token));
-            console.log(data.token.accessToken);
             return {
                 ...state,
                 isAuthenticated: true,
@@ -105,6 +102,8 @@ export const reducer = (state, action) => {
                 token: data.token,
                 status: {
                     ...state.status,
+                    ...clearAccountStatus,
+                    ...clearAuthStatus,
                     userAuthSuccess: true,
                     userAuthInProgress: false,
                     userAuthFailed: false,
@@ -118,6 +117,8 @@ export const reducer = (state, action) => {
                 message: data.message,
                 status: {
                     ...state.status,
+                    ...clearAccountStatus,
+                    ...clearAuthStatus,
                     userAuthSuccess: false,
                     userAuthInProgress: false,
                     userAuthFailed: true,
@@ -134,6 +135,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearAuthStatus,
+                    ...clearAccountStatus,
                     autoAuthenticateUserSuccess: true,
                 },
             };
@@ -146,6 +148,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearAuthStatus,
+                    ...clearAccountStatus,
                     autoAuthenticateUserInProgress: true,
                 },
             };
@@ -159,6 +162,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearAuthStatus,
+                    ...clearAccountStatus,
                     autoAuthenticateUserFailed: true,
                 },
             };
@@ -171,6 +175,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearAuthStatus,
+                    ...clearAccountStatus,
                     autoAuthenticateUserFailedNoLocals: true,
                 },
             };
@@ -182,9 +187,30 @@ export const reducer = (state, action) => {
             };
 
         case USER_REGISTRATION_SUCCESS:
-            return { ...state, hasError: false, message: data.message };
+            return {
+                ...state,
+                ...clearError,
+                hasError: false,
+                status: {
+                    ...state.status,
+                    ...clearAccountStatus,
+                    ...clearAuthStatus,
+                    userRegisterSuccess: true,
+                },
+            };
+
         case USER_REGISTRATION_FAILED:
-            return { ...state, hasError: true, message: data.message };
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                status: {
+                    ...state.status,
+                    ...clearAccountStatus,
+                    ...clearAuthStatus,
+                    userRegisterFailed: true,
+                },
+            };
 
         case GET_CAMPAIGN_SUCCESS:
             return {
@@ -897,4 +923,9 @@ const clearProofStatus = {
     createProofFailed: false,
     deleteProofSuccess: false,
     deleteProofFailed: false,
+};
+
+const clearAccountStatus = {
+    userRegisterSuccess: false,
+    userRegisterFailed: false,
 };

@@ -47,7 +47,7 @@ export default function Profile() {
     const { state, dispatch } = useAuthContext();
     const [alert, setAlert] = useState(initAlert);
     const [data, setData] = useState(initData);
-    console.log(state);
+    // console.log(state);
 
     useLayoutEffect(() => {
         setData({ ...data, name: state.user.name, email: state.user.email });
