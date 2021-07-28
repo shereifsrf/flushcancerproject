@@ -19,7 +19,6 @@ import {
     CREATE_CAMPAIGN_IN_PROGRESS,
     GET_CAMPAIGN_LIST_SUCCESS,
     GET_CAMPAIGN_LIST_FAILED,
-    GET_CAMPAIGN_LIST_IN_PROGRESS,
     AUTO_AUTHENTICATE_USER_SUCCESS,
     AUTO_AUTHENTICATE_USER_FAILED,
     AUTO_AUTHENTICATE_USER_IN_PROGRESS,
@@ -30,7 +29,6 @@ import {
     CREATE_DONATION_IN_PROGRESS,
     CREATE_DONATION_SUCCESS,
     CREATE_DONATION_FAILED,
-    GET_DONATION_LIST_IN_PROGRESS,
     GET_DONATION_LIST_SUCCESS,
     GET_DONATION_LIST_FAILED,
     CREATE_COMMENT_IN_PROGRESS,
@@ -60,6 +58,7 @@ import {
     CREATE_PROOF_FAILED,
     DELETE_PROOF_FAILED,
     DELETE_PROOF_SUCCESS,
+    CLEAR_STATUS,
 } from "../constants";
 
 export const initialState = {
@@ -92,6 +91,9 @@ export const reducer = (state, action) => {
     switch (action.type) {
         case INITIAL:
             return { ...initialState };
+
+        case CLEAR_STATUS:
+            return { ...state, status: {} };
 
         case USER_LOGIN_SUCCESS:
             return {
@@ -392,17 +394,6 @@ export const reducer = (state, action) => {
                 },
             };
 
-        case GET_CAMPAIGN_LIST_IN_PROGRESS:
-            return {
-                ...state,
-                ...clearError,
-                status: {
-                    ...state.status,
-                    ...clearCampaignStatus,
-                    getCampaignListInProgress: true,
-                },
-            };
-
         case DELETE_CAMPAIGN_SUCCESS:
             return {
                 ...state,
@@ -504,16 +495,6 @@ export const reducer = (state, action) => {
                 },
             };
 
-        case GET_DONATION_LIST_IN_PROGRESS:
-            return {
-                ...state,
-                ...clearError,
-                status: {
-                    ...state.status,
-                    ...clearDonationStatus,
-                    getDonationListInProgress: true,
-                },
-            };
         case CREATE_COMMENT_SUCCESS:
             return {
                 ...state,

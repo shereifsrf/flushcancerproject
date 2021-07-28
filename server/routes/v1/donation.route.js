@@ -13,7 +13,7 @@ router.param("donationId", controller.load);
 
 router
     .route("/")
-    .get(findAccess(), controller.list)
+    .get(authorize(LOGGED_USER), controller.list)
     .post(authorize(LOGGED_USER), controller.create);
 
 router

@@ -353,7 +353,7 @@ export default function Campaign() {
                                         name="name"
                                         fullWidth
                                         multiline
-                                        rowsMax={2}
+                                        maxRows={2}
                                         value={data.name}
                                         variant="outlined"
                                         onChange={handleChange}
@@ -460,7 +460,7 @@ export default function Campaign() {
                                                 label="category"
                                                 name="category"
                                                 fullWidth
-                                                rowsMax={2}
+                                                maxRows={2}
                                                 value={data.category.name}
                                                 variant="outlined"
                                             />
@@ -475,8 +475,8 @@ export default function Campaign() {
                                         name="description"
                                         fullWidth
                                         multiline
-                                        rows={4}
-                                        rowsMax={10}
+                                        minRows={4}
+                                        maxRows={10}
                                         value={data.description}
                                         variant="outlined"
                                         onChange={handleChange}
@@ -518,7 +518,10 @@ export default function Campaign() {
                                     <ProofDocument campaignId={campaignId} />
                                 )}
                                 {isEditable() && (
-                                    <Grid container justify="space-between">
+                                    <Grid
+                                        container
+                                        justifyContent="space-between"
+                                    >
                                         <Grid item>
                                             <Button
                                                 fullWidth

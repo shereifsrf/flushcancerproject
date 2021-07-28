@@ -165,7 +165,7 @@ export default function ProofDocument({ campaignId }) {
                 {!isEmpty(data.proofs) &&
                     data.proofs.map((proof) => {
                         return (
-                            <Box mb={2}>
+                            <Box key={proof.id} mb={2}>
                                 <img
                                     className={classes.image}
                                     src={proof.imgSrc}

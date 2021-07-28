@@ -110,7 +110,7 @@ export default function TopNav() {
         setAnchorEl(event.currentTarget);
     };
 
-    const handlePublicCampaign = () => history.replace(`/${PUBLIC_CAMPAIGNS}`);
+    const handlePublicCampaign = () => history.push(`/${PUBLIC_CAMPAIGNS}`);
 
     const handleCreateCampaign = () => history.replace(`/${CAMPAIGNS_URL}`);
 
@@ -149,7 +149,7 @@ export default function TopNav() {
             <MenuItem
                 onClick={() => {
                     handleMenuClose();
-                    history.replace(`/${DASHBOARD_URL}`);
+                    history.push(`/${DASHBOARD_URL}`);
                 }}
             >
                 Dashboard

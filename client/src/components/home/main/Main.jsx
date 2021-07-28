@@ -21,11 +21,9 @@ export default function Album() {
         <>
             <CssBaseline />
             <Grid container spacing={3}>
-                {state.user.role !== USER_ROLE_DONOR && (
-                    <Grid item md={8} lg={8}>
-                        <CampaignList dashboard={true} />
-                    </Grid>
-                )}
+                <Grid item md={8} lg={8}>
+                    <CampaignList dashboard={true} />
+                </Grid>
                 <Grid item lg={4} md={4}>
                     <DonationsDash />
                 </Grid>

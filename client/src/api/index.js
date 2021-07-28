@@ -18,7 +18,6 @@ import {
     USER_LOGIN_SUCCESS,
     USER_REGISTRATION_FAILED,
     USER_REGISTRATION_SUCCESS,
-    GET_CAMPAIGN_LIST_IN_PROGRESS,
     GET_CAMPAIGN_LIST_SUCCESS,
     GET_CAMPAIGN_LIST_FAILED,
     AUTO_AUTHENTICATE_USER_SUCCESS,
@@ -61,6 +60,7 @@ import {
     CREATE_PROOF_FAILED,
     DELETE_PROOF_FAILED,
     DELETE_PROOF_SUCCESS,
+    CLEAR_STATUS,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -74,6 +74,10 @@ let instance = axios.create({
 
 export const initState = (dispatch) => {
     dispatch({ type: INITIAL });
+};
+
+export const clearStatus = (dispatch) => {
+    dispatch({ type: CLEAR_STATUS });
 };
 
 const getLocalStorage = () => {
@@ -454,8 +458,6 @@ export const deleteComment = (commentId, dispatch) => {
 };
 
 export const getCampaignList = (dashboard, dispatch) => {
-    dispatch({ type: GET_CAMPAIGN_LIST_IN_PROGRESS });
-
     instance
         .get(`campaigns`, {
             params: {
@@ -480,8 +482,6 @@ export const getCampaignList = (dashboard, dispatch) => {
 };
 
 export const getDonationList = (dispatch) => {
-    dispatch({ type: GET_DONATION_LIST_IN_PROGRESS });
-
     instance
         .get(`donations`, {
             headers: {

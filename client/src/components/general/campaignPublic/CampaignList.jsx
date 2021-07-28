@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import CampaignCard from "./CampaignCard";
-import { getCampaignList } from "../../../api";
+import { clearStatus, getCampaignList } from "../../../api";
 import { useAuthContext } from "../../AuthProvider";
 import { isEmpty } from "lodash";
 
@@ -20,24 +20,35 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const initState = [];
+const initData = {
+    loading: false,
+    campaigns: [],
+};
 
 export default function CampaignList(props) {
     const classes = useStyles();
-    const [campaigns, setCampaigns] = useState(initState);
+    const [data, setData] = useState(initData);
     const { state, dispatch } = useAuthContext();
     const status = state.status;
 
     useLayoutEffect(() => {
-        getCampaignList(props.dashboard || false, dispatch);
+        clearStatus(dispatch);
+        getCampaignList(props.dashboard, dispatch);
+        setData({ ...data, loading: true });
     }, []);
 
-    useEffect(() => {
-        // console.log(state.campaigns);
-        if (!isEmpty(state.campaigns)) setCampaigns(state.campaigns);
+    useLayoutEffect(() => {
+        if (data.loading) {
+            if (status.getCampaignListSuccess) {
+                setData({
+                    ...data,
+                    loading: false,
+                    campaigns: state.campaigns,
+                });
+            }
+        }
     }, [state]);
 
-    // console.log(campaigns);
     return (
         <>
             <CssBaseline />
@@ -53,38 +64,30 @@ export default function CampaignList(props) {
                         >
                             Campaign List
                         </Typography>
-                        {/* <Typography
-                            variant="h5"
-                            align="center"
-                            color="textSecondary"
-                            paragraph
-                        >
-                            Here are the Campaigns. Please view or edit as you
-                            wish
-                        </Typography> */}
                     </Container>
                 </div>
-                {status.getCampaignListInProgress && (
+                {data.loading && (
                     <Box justifyContent="center" display="flex">
                         <CircularProgress />
                     </Box>
                 )}
-                {status.getCampaignListFailed && (
-                    <Typography
-                        component="h1"
-                        variant="h2"
-                        align="center"
-                        color="textPrimary"
-                        gutterBottom
-                        style={{ wordWrap: "break-word" }}
-                    >
-                        Campaign List Not found
-                    </Typography>
-                )}
+                {!data.loading &&
+                    (status.getCampaignListFailed ||
+                        isEmpty(data.campaigns)) && (
+                        <Typography
+                            component="h6"
+                            align="center"
+                            color="textPrimary"
+                            gutterBottom
+                            style={{ wordWrap: "break-word" }}
+                        >
+                            No campaigns found at the moment
+                        </Typography>
+                    )}
                 {status.getCampaignListSuccess && (
                     <Grid container spacing={2}>
-                        {!isEmpty(campaigns) &&
-                            campaigns.map((campaign) => {
+                        {!isEmpty(data.campaigns) &&
+                            data.campaigns.map((campaign) => {
                                 return (
                                     <Grid
                                         item

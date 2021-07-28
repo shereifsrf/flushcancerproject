@@ -13,6 +13,8 @@ import { useAuthContext } from "../../AuthProvider";
 import { getDonationList } from "../../../api";
 import { isEmpty } from "lodash";
 import ReceiptIcon from "@material-ui/icons/Receipt";
+import { useHistory } from "react-router-dom";
+import { PUBLIC_CAMPAIGNS, USER_ROLE_DONOR } from "../../../constants";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,24 +23,38 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const initData = [];
+const initData = {
+    loading: false,
+    donations: [],
+};
 
 export default function DonationsDash() {
     const classes = useStyles();
     const { state, dispatch } = useAuthContext();
-    const [donations, setDonations] = useState(initData);
+    const [data, setData] = useState(initData);
     const status = state.status;
+    const history = useHistory();
 
     useLayoutEffect(() => {
         getDonationList(dispatch);
+        setData({ ...data, loading: true });
     }, []);
 
-    useEffect(() => {
-        // console.log(state.campaigns);
-        if (!isEmpty(state.donations)) setDonations(state.donations);
+    useLayoutEffect(() => {
+        if (data.loading) {
+            if (status.getDonationListSuccess) {
+                setData({
+                    ...data,
+                    donations: state.donations,
+                    loading: false,
+                });
+            } else if (status.getDonationListFailed) {
+                redirectToPublicCampaign();
+            }
+        }
     }, [state]);
 
-    // console.log(state);
+    console.log(data.donations);
 
     return (
         <>
@@ -55,38 +71,30 @@ export default function DonationsDash() {
                         >
                             Donation List
                         </Typography>
-                        {/* <Typography
-                            variant="h5"
-                            align="center"
-                            color="textSecondary"
-                            paragraph
-                        >
-                            Here are the Campaigns. Please view or edit as you
-                            wish
-                        </Typography> */}
                     </Container>
                 </div>
-                {status.getDonationListInProgress && (
+                {data.loading && (
                     <Box justifyContent="center" display="flex">
                         <CircularProgress />
                     </Box>
                 )}
-                {status.getDonationListFailed && (
-                    <Typography
-                        component="h1"
-                        variant="h2"
-                        align="center"
-                        color="textPrimary"
-                        gutterBottom
-                        style={{ wordWrap: "break-word" }}
-                    >
-                        Campaign List Not found
-                    </Typography>
-                )}
+                {!data.loading &&
+                    (status.getDonationListFailed ||
+                        isEmpty(data.donations)) && (
+                        <Typography
+                            component="h6"
+                            align="center"
+                            color="textPrimary"
+                            gutterBottom
+                            style={{ wordWrap: "break-word" }}
+                        >
+                            No donations found at the moment
+                        </Typography>
+                    )}
                 {status.getDonationListSuccess && (
                     <List className={classes.root}>
-                        {!isEmpty(donations) &&
-                            donations.map((donation) => {
+                        {!isEmpty(data.donations) &&
+                            data.donations.map((donation) => {
                                 // console.log(donation);
                                 return (
                                     <div key={donation.id}>

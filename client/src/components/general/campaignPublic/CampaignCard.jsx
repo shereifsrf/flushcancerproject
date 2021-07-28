@@ -113,7 +113,7 @@ export default function CampaignCard({ campaign, dashboard }) {
         setAlert({
             open: true,
             title: `${campaign.name} Link`,
-            contentText: `${url}/${campaign.id}`,
+            contentText: `${window.origin}/${campaign.id}`,
             buttonText: "Great",
         });
     };
@@ -177,7 +177,7 @@ export default function CampaignCard({ campaign, dashboard }) {
                         value={parseFloat(progressVal)}
                     />
                 </Box>
-                <Grid container justify="space-between">
+                <Grid container justifyContent="space-between">
                     <Grid item>${campaign.totalDonation}</Grid>
                     <Grid item>${campaign.limit}</Grid>
                 </Grid>
