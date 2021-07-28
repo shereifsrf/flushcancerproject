@@ -16,20 +16,20 @@ const domainUrl =
 const transporter = nodemailer.createTransport({
     port: emailConfig.port,
     host: emailConfig.host,
+    secure: true,
     auth: {
+        // type: "OAuth2",
         user: emailConfig.username,
         pass: emailConfig.password,
     },
-    secure: true, // upgrades later with STARTTLS -- change this based on the PORT
 });
 
 // verify connection configuration
 transporter.verify((error) => {
     console.log("emailConfig.port: " + emailConfig.port);
     console.log("domainUrl: " + domainUrl);
-    logger.error("error#########" + error);
     if (error) {
-        console.log("error with email connection");
+        console.log("error with email connection => " + error);
     }
 });
 

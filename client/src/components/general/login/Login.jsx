@@ -38,6 +38,7 @@ const initData = {
     showPassword: false,
     errorMessage: null,
     inProgress: false,
+    nonPrompt: false,
 };
 
 const initAlert = {
@@ -66,12 +67,18 @@ const Login = () => {
     useLayoutEffect(() => {
         if (!isSignUp) {
             autoAuthenticateUser(dispatch);
+            setData({ ...data, inProgress: true, nonPrompt: true });
         }
     }, []);
 
     useLayoutEffect(() => {
-        console.log(state);
-        if (status.userRegisterSuccess && data.inProgress) {
+        if (
+            data.nonPrompt &&
+            (status.autoAuthenticateUserFailed ||
+                status.autoAuthenticateUserFailedNoLocals)
+        ) {
+            setData({ ...data, inProgress: false, nonPrompt: false });
+        } else if (status.userRegisterSuccess && data.inProgress) {
             setAlert({
                 open: true,
                 title: "Registration Success",
@@ -96,11 +103,6 @@ const Login = () => {
                     buttonText: "Alright",
                 });
             }
-            setData({ ...data, inProgress: false });
-        } else if (
-            status.autoAuthenticateUserFailed ||
-            status.autoAuthenticateUserFailedNoLocals
-        ) {
             setData({ ...data, inProgress: false });
         }
     }, [state]);
