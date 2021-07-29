@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const initialState = {
+const initData = {
     name: "",
     description: "",
     limit: 0,
@@ -101,7 +101,7 @@ const getOtherOptions = (isEditable, element) => {
 };
 
 export default function Campaign() {
-    const [data, setData] = useState(initialState);
+    const [data, setData] = useState(initData);
     const [alert, setAlert] = useState(initAlert);
     const { state, dispatch } = useAuthContext();
     const history = useHistory();
@@ -178,7 +178,7 @@ export default function Campaign() {
     }, [state]);
 
     useLayoutEffect(() => {
-        if (isCreate) setData({ ...initialState, name: "" });
+        if (isCreate) setData({ ...initData, name: "" });
     }, [isCreate]);
 
     const handleChange = (e) => {
@@ -209,10 +209,7 @@ export default function Campaign() {
             if (status.getCampaignSuccess || status.updateCampaignSuccess) {
                 const campaign = state.campaign;
                 const document = campaign.document || null;
-                const category = campaign.category || {
-                    name: "Not-Found",
-                    id: "error",
-                };
+                const category = campaign.category || "";
                 // console.log(isEmpty(document));
                 setData({
                     ...data,
@@ -230,7 +227,6 @@ export default function Campaign() {
                           document.data
                       ).toString("base64")}`
                     : imgSrc.current;
-                // console.log(imgSrc.current);
             }
         }
     }, [isCreate, state]);
@@ -240,16 +236,30 @@ export default function Campaign() {
     };
 
     const handleSubmit = (e) => {
+        console.log(data);
         e.preventDefault();
-        // console.log(data);
-        if (!isCreate) updateCampaign(campaignId, data, dispatch);
-        else createCampaign(data, dispatch);
+        if (
+            data.name === "" ||
+            data.category === "" ||
+            data.limit === 0 ||
+            data.description === "" ||
+            data.document === null
+        ) {
+            setAlert({
+                open: true,
+                title: "Validation Error",
+                contentText: `Some fields are empty, please fill before submit`,
+                buttonText: "Ok",
+            });
+        } else {
+            if (!isCreate) updateCampaign(campaignId, data, dispatch);
+            else createCampaign(data, dispatch);
+        }
     };
 
     const handleDelete = (e) => {
         e.preventDefault();
 
-        // console.log(alert);
         setAlert({
             open: true,
             title: "Warning",
@@ -414,12 +424,7 @@ export default function Campaign() {
                                                     <Select
                                                         labelId="label-category"
                                                         name="category"
-                                                        value={
-                                                            data.category
-                                                                ? data.category
-                                                                      .id
-                                                                : ""
-                                                        }
+                                                        value={data.category}
                                                         label="Select Category"
                                                         onChange={handleChange}
                                                     >
