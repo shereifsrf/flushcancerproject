@@ -46,7 +46,7 @@ exports.create = async (req, res, next) => {
         const donation = new Donation(req.body);
         const savedDonation = await donation.save();
         res.status(httpStatus.CREATED);
-        res.json(savedDonation.transform());
+        res.json(await savedDonation.transform());
     } catch (error) {
         next(Donation.checkDuplicateInsert(error));
     }

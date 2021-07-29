@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
-const { isNil, omitBy } = require("lodash");
+const { isNil, omitBy, isEmpty } = require("lodash");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
+const controller = require("../controllers/campaign.controller");
 
 const donationSchema = new mongoose.Schema(
     {
@@ -17,6 +18,7 @@ const donationSchema = new mongoose.Schema(
         },
         amount: {
             type: Number,
+            min: [1, "Min donation is 1"],
             required: true,
         },
         updatedBy: {
@@ -109,7 +111,7 @@ donationSchema.statics = {
 };
 
 donationSchema.method({
-    transform() {
+    async transform() {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
@@ -122,21 +124,36 @@ donationSchema.method({
             "updatedBy",
             "amount",
         ];
-        // const adminFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedAt", "createdBy", "updatedBy"];
-        fields.map((field) => {
-            switch (field) {
-                case "campaignId":
-                    const campaign = this[field];
-                    transformed["campaign"] = {
-                        id: campaign._id,
-                        name: campaign.name,
-                    };
-                    break;
-                default:
-                    transformed[field] = this[field];
-                    break;
-            }
-        });
+
+        let totalDonation = 0;
+        console.log("here1");
+
+        await Promise.all([
+            controller
+                .getTotalDonation(this["campaignId"])
+                .then(
+                    (res) =>
+                        (totalDonation = !isEmpty(res)
+                            ? res[0].totalDonation
+                            : 0)
+                ),
+            fields.map((field) => {
+                switch (field) {
+                    case "campaignId":
+                        const campaign = this[field];
+                        transformed["campaign"] = {
+                            id: campaign._id,
+                            name: campaign.name,
+                        };
+                        break;
+                    default:
+                        transformed[field] = this[field];
+                        break;
+                }
+            }),
+        ]);
+
+        transformed["totalDonation"] = totalDonation;
 
         return transformed;
     },

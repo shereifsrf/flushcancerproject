@@ -8,6 +8,7 @@ const User = require("./user.model");
 const moment = require("moment-timezone");
 const Donation = require("./donation.model");
 const CampaignLike = require("./campaign.like.model");
+const controller = require("../controllers/campaign.controller");
 
 /**
  * Campaign Schema
@@ -180,12 +181,14 @@ campaignSchema.method({
             let likeId = undefined;
 
             await Promise.all([
-                getTotalDonation(this["id"]).then(
-                    (res) =>
-                        (totalDonation = !isEmpty(res)
-                            ? res[0].totalDonation
-                            : 0)
-                ),
+                controller
+                    .getTotalDonation(this["id"])
+                    .then(
+                        (res) =>
+                            (totalDonation = !isEmpty(res)
+                                ? res[0].totalDonation
+                                : 0)
+                    ),
                 getTotalLikes(this["id"]).then(
                     (res) =>
                         (totalLikes = !isEmpty(res) ? res[0].totalLikes : 0)
@@ -308,26 +311,6 @@ const getTotalLikes = async (campaignId) => {
                 $group: {
                     _id: "$campaignId",
                     totalLikes: { $sum: 1 },
-                },
-            },
-        ])
-            .then((result) => resolve(result))
-            .catch((error) => reject(error));
-    });
-};
-
-const getTotalDonation = async (campaignId) => {
-    return new Promise((resolve, reject) => {
-        Donation.aggregate([
-            {
-                $match: {
-                    campaignId: mongoose.Types.ObjectId(campaignId),
-                },
-            },
-            {
-                $group: {
-                    _id: "$campaignId",
-                    totalDonation: { $sum: "$amount" },
                 },
             },
         ])

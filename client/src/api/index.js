@@ -27,10 +27,8 @@ import {
     DELETE_CAMPAIGN_IN_PROGRESS,
     DELETE_CAMPAIGN_SUCCESS,
     DELETE_CAMPAIGN_FAILED,
-    CREATE_DONATION_IN_PROGRESS,
     CREATE_DONATION_SUCCESS,
     CREATE_DONATION_FAILED,
-    GET_DONATION_LIST_IN_PROGRESS,
     GET_DONATION_LIST_SUCCESS,
     GET_DONATION_LIST_FAILED,
     CREATE_COMMENT_IN_PROGRESS,
@@ -354,8 +352,6 @@ export const createCampaign = (data, dispatch) => {
 };
 
 export const createDonation = ({ campaignId, amount }, dispatch) => {
-    dispatch({ type: CREATE_DONATION_IN_PROGRESS });
-
     instance
         .post(
             `donations`,

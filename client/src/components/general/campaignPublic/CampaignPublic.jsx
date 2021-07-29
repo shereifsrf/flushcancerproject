@@ -37,7 +37,6 @@ import {
     deleteLike,
 } from "../../../api";
 import FavoriteIcon from "@material-ui/icons/Favorite";
-import { PUBLIC_CAMPAIGNS } from "../../../constants";
 import CampaignReport from "./CampaignReporting";
 import CampaignRating from "./CampaignRating";
 
@@ -64,11 +63,6 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         flexDirection: "column",
     },
-    // interact: {
-    //     "& *": {
-    //         marginRight: 50,
-    //     },
-    // },
     bottomSec: {
         backgroundColor: "#eceff1",
         marginBottom: theme.spacing(4),
@@ -96,7 +90,7 @@ const initAlert = {
 const initField = {};
 
 const initData = {
-    isUnloaded: true,
+    loading: false,
     name: "",
     description: "",
     document: null,
@@ -105,14 +99,19 @@ const initData = {
     expiresAt: addMonths(new Date(), 5),
     category: { id: "", name: "" },
     user: { id: "", name: "" },
-    totalDonation: 0,
     amount: 0,
     comments: null,
     comment: "",
 };
 
+const initDonate = {
+    loading: false,
+    donation: 0,
+    totalDonation: 0,
+};
+
 const initLike = {
-    inProgress: false,
+    loading: false,
     id: undefined,
     likable: true,
     total: 0,
@@ -121,6 +120,7 @@ const initLike = {
 export default function CampaignPublic() {
     const [data, setData] = useState(initData);
     const [like, setLike] = useState(initLike);
+    const [donate, setDonate] = useState(initDonate);
     const [field, setField] = useState(initField);
     const [alert, setAlert] = useState(initAlert);
     const { campaignId } = useParams();
@@ -129,19 +129,23 @@ export default function CampaignPublic() {
     const status = state.status;
 
     const getCampaignData = useCallback(() => {
-        getCampaign(campaignId, dispatch, true);
-    }, [campaignId]);
+        if (!data.loading) {
+            if (campaignId) {
+                getCampaign(campaignId, dispatch, true);
+                setData({ ...data, loading: true });
+            }
+        }
+    }, [campaignId, data]);
 
     useLayoutEffect(() => {
-        // console.log(campaignId);
-        if (campaignId) getCampaignData();
-    }, [campaignId]);
+        getCampaignData();
+    }, []);
 
     useLayoutEffect(() => {
         if (status.createLikeSuccess) {
             setLike({
                 ...like,
-                inProgress: false,
+                loading: false,
                 likable: false,
                 id: state.like.id,
                 total: ++like.total,
@@ -149,7 +153,7 @@ export default function CampaignPublic() {
         } else if (status.deleteLikeSuccess) {
             setLike({
                 ...like,
-                inProgress: false,
+                loading: false,
                 likable: true,
                 id: undefined,
                 total: --like.total,
@@ -160,41 +164,45 @@ export default function CampaignPublic() {
     useLayoutEffect(() => {
         if (!alert.open) {
             if (state.hasError) {
-                // console.log("im here");
-                setData({ ...data, isUnloaded: true });
                 setAlert({
                     open: true,
                     title: "Error encountered",
                     contentText: state.message,
                     buttonText: "Alright",
                 });
-            } else if (status.createDonationSuccess) {
-                setAlert({
-                    open: true,
-                    title: "Donation Status",
-                    contentText: `Successfully donated ${state.donation.amount}`,
-                    buttonText: "Great",
-                });
-                setData({ ...data, isUnloaded: true });
-                getCampaignData();
+                if (status.createDonationFailed) {
+                    setDonate({ ...donate, loading: false });
+                }
             } else if (
                 status.createCommentSuccess ||
                 status.updateCommentSuccess ||
                 status.deleteCommentSuccess
             ) {
-                setData({ ...data, isUnloaded: true, comment: "" });
+                setData({ ...data, loading: true, comment: "" });
                 getCampaignData();
             }
         }
     }, [state]);
 
-    //for field
-    // useEffect(() => {
-    //     set
-    // }, [field])
+    useLayoutEffect(() => {
+        if (status.createDonationSuccess && donate.loading) {
+            setAlert({
+                open: true,
+                title: "Donation Status",
+                contentText: `Successfully donated ${state.donation.amount}`,
+                buttonText: "Great",
+            });
+            setDonate({
+                ...donate,
+                loading: false,
+                donation: 0,
+                totalDonation: state.donation.totalDonation,
+            });
+        }
+    }, [state]);
 
     useEffect(() => {
-        if (status.getCampaignSuccess && data.isUnloaded) {
+        if (status.getCampaignSuccess && data.loading) {
             const campaign = state.campaign;
             // console.log(campaign.totalDonation + data.amount);
             const document = campaign.document || null;
@@ -209,7 +217,7 @@ export default function CampaignPublic() {
                 : "";
             setData({
                 ...data,
-                isUnloaded: false,
+                loading: false,
                 name: campaign.name,
                 description: campaign.description,
                 limit: parseFloat(campaign.limit.toString()) || 0,
@@ -218,19 +226,17 @@ export default function CampaignPublic() {
                 createdAt: campaign.createdAt || data.createdAt,
                 expiresAt: campaign.expiresAt || data.expiresAt,
                 user: campaign.user || data.user,
-                totalDonation: campaign.totalDonation || 0,
                 comments: campaign.comments || data.comments,
             });
             const val = mapValues(_.keyBy(campaign.comments, "id"), "comment");
             setField(val);
-            // console.log(campaign.like.likable || like.likable);
-            // console.log(campaign.like.likable);
             setLike({
                 ...like,
                 likable: campaign.like.likable,
                 id: campaign.like.likeId || like.id,
                 total: campaign.totalLikes || data.totalLikes,
             });
+            setDonate({ ...donate, totalDonation: campaign.totalDonation });
         }
     }, [state, data]);
 
@@ -239,18 +245,16 @@ export default function CampaignPublic() {
     };
 
     const handleDonate = () => {
-        // console.log(data.amount);
-        createDonation({ campaignId, amount: data.amount }, dispatch);
+        createDonation({ campaignId, amount: donate.donation }, dispatch);
+        setDonate({ ...donate, loading: true });
     };
 
     const handleComment = () => {
-        // console.log(data.amount);
         createComment({ campaignId, comment: data.comment }, dispatch);
     };
 
     const handleCommentSave = (e) => {
         const key = e.currentTarget.name;
-        // console.log(field[key]);
         updateComment(
             { body: { comment: field[key] }, commentId: key },
             dispatch
@@ -280,11 +284,11 @@ export default function CampaignPublic() {
     };
 
     const handleCommentChange = (e) => {
-        // console.log(e.target.name);
         setField({ ...field, [e.target.name]: e.target.value });
     };
 
     const handleLikeButton = (e) => {
+        setLike({ ...like, loading: true });
         if (like.likable) {
             createLike(campaignId, dispatch);
         } else if (!like.likable) {
@@ -313,8 +317,7 @@ export default function CampaignPublic() {
                 other={alert.other}
             />
             <Container maxWidth="md" className={classes.root}>
-                {(status.getCampaignInProgress ||
-                    status.createDonationInProgress) && (
+                {data.loading && (
                     <Container maxWidth="sm">
                         <Box justifyContent="center" display="flex">
                             <CircularProgress />
@@ -367,7 +370,7 @@ export default function CampaignPublic() {
                                 </Box>
 
                                 <Box component="h3" my={1} pb={3}>
-                                    Total Donated: ${data.totalDonation}
+                                    Total Donated: ${donate.totalDonation}
                                 </Box>
                                 <Box display="flex" alignContent="flex-start">
                                     <Box>
@@ -386,7 +389,14 @@ export default function CampaignPublic() {
                                                 id="outlined-adornment-amount"
                                                 defaultValue="0"
                                                 name="amount"
-                                                onChange={handleChange}
+                                                value={donate.donation}
+                                                onChange={(e) =>
+                                                    setDonate({
+                                                        ...donate,
+                                                        donation:
+                                                            e.target.value,
+                                                    })
+                                                }
                                                 startAdornment={
                                                     <InputAdornment position="start">
                                                         $
@@ -406,15 +416,22 @@ export default function CampaignPublic() {
                                             color="primary"
                                             size="large"
                                             onClick={handleDonate}
-                                            value={data.amount}
                                         >
-                                            Donate
+                                            Donate{" "}
+                                            {donate.loading && (
+                                                <>
+                                                    {"  "}{" "}
+                                                    <CircularProgress
+                                                        size={20}
+                                                    />
+                                                </>
+                                            )}
                                         </Button>
                                     </Box>
                                 </Box>
                                 <Box mt={2} display="flex" flexDirection="row">
                                     <Box>
-                                        {!like.inProgress && (
+                                        {!like.loading && (
                                             <IconButton
                                                 className={classes.likeButton}
                                                 onClick={handleLikeButton}
@@ -427,7 +444,7 @@ export default function CampaignPublic() {
                                                 )}
                                             </IconButton>
                                         )}
-                                        {like.inProgress && (
+                                        {like.loading && (
                                             <Box>
                                                 <CircularProgress size={20} />
                                             </Box>

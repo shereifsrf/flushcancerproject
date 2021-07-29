@@ -26,7 +26,6 @@ import {
     DELETE_CAMPAIGN_IN_PROGRESS,
     DELETE_CAMPAIGN_SUCCESS,
     DELETE_CAMPAIGN_FAILED,
-    CREATE_DONATION_IN_PROGRESS,
     CREATE_DONATION_SUCCESS,
     CREATE_DONATION_FAILED,
     GET_DONATION_LIST_SUCCESS,
@@ -437,23 +436,9 @@ export const reducer = (state, action) => {
                 donation: data,
                 status: {
                     ...state.status,
-                    ...clearCampaignStatus,
                     ...clearDonationStatus,
                     ...clearLikeStatus,
                     createDonationSuccess: true,
-                },
-            };
-
-        case CREATE_DONATION_IN_PROGRESS:
-            return {
-                ...state,
-                ...clearError,
-                status: {
-                    ...state.status,
-                    ...clearCampaignStatus,
-                    ...clearDonationStatus,
-                    ...clearLikeStatus,
-                    createDonationInProgress: true,
                 },
             };
 
@@ -464,7 +449,6 @@ export const reducer = (state, action) => {
                 message: data.message,
                 status: {
                     ...state.status,
-                    ...clearCampaignStatus,
                     ...clearDonationStatus,
                     ...clearLikeStatus,
                     createDonationFailed: true,
@@ -843,7 +827,6 @@ const clearCampaignStatus = {
 const clearDonationStatus = {
     createDonationSuccess: false,
     createDonationFailed: false,
-    createDonationInProgress: false,
     getDonationListSuccess: false,
     getDonationListFailed: false,
     getDonationListInProgress: false,

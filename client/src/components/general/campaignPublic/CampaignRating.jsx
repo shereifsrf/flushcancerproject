@@ -109,7 +109,9 @@ export default function CampaignRating({ campaignId }) {
                 </Button>
             )}
 
-            <Box pl={2}>{`Overall Rating: (${rating.rating})`}</Box>
+            <Box pl={2}>{`Overall Rating: (${
+                Math.round(rating.rating * 2) / 2
+            })`}</Box>
             {/* <Box ml={2}>{labels[hover !== -1 ? hover : rating.rating]}</Box> */}
         </div>
     );

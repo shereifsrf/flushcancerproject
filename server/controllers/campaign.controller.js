@@ -11,6 +11,7 @@ const CampaignComment = require("../models/campaign.comment.model");
 const User = require("../models/user.model");
 const mongoose = require("mongoose");
 const CampaignRating = require("../models/campaign.rating.model");
+const Donation = require("../models/donation.model");
 
 /**
  * Load user and append to req.
@@ -197,4 +198,20 @@ const findRatable = async (campaignId, userId) => {
         },
         "_id"
     );
+};
+
+module.exports.getTotalDonation = async (campaignId) => {
+    return await Donation.aggregate([
+        {
+            $match: {
+                campaignId: mongoose.Types.ObjectId(campaignId),
+            },
+        },
+        {
+            $group: {
+                _id: "$campaignId",
+                totalDonation: { $sum: "$amount" },
+            },
+        },
+    ]).exec();
 };
