@@ -299,6 +299,7 @@ export const updateCampaign = (campaignId, data, dispatch) => {
     formData.append("description", data.description || "");
     formData.append("limit", data.limit || 0);
     formData.append("categoryId", data.category.id || "");
+    formData.append("expiresAt", data.expiresAt || "");
 
     if (data.imageChanged) formData.append("document", data.document);
 
@@ -329,6 +330,7 @@ export const createCampaign = (data, dispatch) => {
     formData.append("description", data.description || "");
     formData.append("limit", data.limit || 0);
     formData.append("categoryId", data.category || "");
+    formData.append("expiresAt", data.expiresAt || "");
 
     if (data.imageChanged) formData.append("document", data.document);
 

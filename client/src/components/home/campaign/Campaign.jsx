@@ -10,16 +10,13 @@ import {
     FormControl,
     InputAdornment,
     Button,
-    Card,
     Grid,
     Box,
     MenuItem,
     Select,
-    IconButton,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CloudUpload, Tune } from "@material-ui/icons";
-import { campaigns } from "../../../dummyData";
 import { useHistory, useParams } from "react-router-dom";
 import SaveIcon from "@material-ui/icons/Save";
 import { isEmpty } from "lodash";
@@ -38,10 +35,17 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { useLayoutEffect } from "react";
 import { Buffer } from "buffer";
 import { useRef } from "react";
-import { CAMPAIGNS_URL, DASHBOARD_URL } from "../../../constants";
+import { DASHBOARD_URL } from "../../../constants";
 import AlertDialog from "../../general/AlertDialog";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ProofDocument from "./ProofDocument";
+import {
+    DateTimePicker,
+    KeyboardDatePicker,
+    MuiPickersUtilsProvider,
+} from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
+import { addDays } from "date-fns";
 
 const useStyles = makeStyles((theme) => ({
     divider: {
@@ -79,6 +83,7 @@ const initData = {
     categories: null,
     imageChanged: false,
     newImage: null,
+    expiresAt: addDays(new Date(), 1),
 };
 
 const initAlert = {
@@ -103,6 +108,7 @@ const getOtherOptions = (isEditable, element) => {
 export default function Campaign() {
     const [data, setData] = useState(initData);
     const [alert, setAlert] = useState(initAlert);
+    const [selectedDate, handleDateChange] = useState(addDays(new Date(), 1));
     const { state, dispatch } = useAuthContext();
     const history = useHistory();
     const classes = useStyles();
@@ -182,6 +188,9 @@ export default function Campaign() {
     }, [isCreate]);
 
     const handleChange = (e) => {
+        if (e["expiresAt"]) {
+            return setData({ ...data, expiresAt: e["expiresAt"] });
+        }
         switch (e.target.name) {
             case "coverImage":
                 // console.log("yes, image changed brother");
@@ -221,6 +230,7 @@ export default function Campaign() {
                     isVerifyDocument: campaign.isVerifyDocument,
                     category: category.id,
                     newImage: null,
+                    expiresAt: campaign.expiresAt,
                 });
                 imgSrc.current = !isEmpty(document)
                     ? `data:${document.contentType}; base64,${new Buffer.from(
@@ -243,7 +253,9 @@ export default function Campaign() {
             data.category === "" ||
             data.limit === 0 ||
             data.description === "" ||
-            data.document === null
+            data.document === null ||
+            data.expiresAt === "Invalid Date" ||
+            data.expiresAt <= new Date()
         ) {
             setAlert({
                 open: true,
@@ -283,7 +295,6 @@ export default function Campaign() {
     const handleAlertOpen = () => {
         setAlert((alert) => ({ ...alert, open: !alert.open }));
     };
-    console.log(isEditable(), status.getCategoryListSuccess, data.categories);
 
     return (
         <>
@@ -471,7 +482,19 @@ export default function Campaign() {
                                         )}
                                     </FormControl>
                                 }
-
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                    <KeyboardDatePicker
+                                        value={data.expiresAt}
+                                        label="Expiry"
+                                        name="expiresAt"
+                                        minDate={addDays(new Date(), 1)}
+                                        fullWidth
+                                        onChange={(val) =>
+                                            handleChange({ expiresAt: val })
+                                        }
+                                        format="dd/MM/yyyy"
+                                    />
+                                </MuiPickersUtilsProvider>
                                 <div>
                                     <TextField
                                         id="standard-multiline-static"
