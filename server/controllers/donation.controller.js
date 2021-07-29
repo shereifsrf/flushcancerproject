@@ -46,7 +46,7 @@ exports.create = async (req, res, next) => {
         const donation = new Donation(req.body);
         const savedDonation = await donation.save();
         res.status(httpStatus.CREATED);
-        res.json(await savedDonation.transform());
+        res.json(await savedDonation.transform(savedDonation.campaignId));
     } catch (error) {
         next(Donation.checkDuplicateInsert(error));
     }
@@ -60,8 +60,8 @@ exports.list = async (req, res, next) => {
             query.userId = userInCharge.id;
         }
         const donations = await Donation.list(query);
-        const transformedDonations = donations.map((donation) =>
-            donation.transform()
+        const transformedDonations = await Promise.all(
+            donations.map(async (donation) => await donation.transform())
         );
         res.json(transformedDonations);
     } catch (error) {

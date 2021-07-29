@@ -111,7 +111,7 @@ donationSchema.statics = {
 };
 
 donationSchema.method({
-    async transform() {
+    async transform(campaignId) {
         const transformed = {};
         // const publicFields = ["id", "userId", "categoryId", "name", "description", "limit", "createdAt", "updatedBy"];
         const fields = [
@@ -126,11 +126,10 @@ donationSchema.method({
         ];
 
         let totalDonation = 0;
-        console.log("here1");
 
         await Promise.all([
             controller
-                .getTotalDonation(this["campaignId"])
+                .getTotalDonation(campaignId || this["campaignId"]._id)
                 .then(
                     (res) =>
                         (totalDonation = !isEmpty(res)
