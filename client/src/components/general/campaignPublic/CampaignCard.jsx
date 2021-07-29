@@ -11,7 +11,6 @@ import Avatar from "@material-ui/core/Avatar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import { red, green } from "@material-ui/core/colors";
-import FavoriteIcon from "@material-ui/icons/Favorite";
 import ShareIcon from "@material-ui/icons/Share";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { limitCharWithDots } from "../../../util";
@@ -25,11 +24,6 @@ import LockIcon from "@material-ui/icons/Lock";
 import VerifiedUserIcon from "@material-ui/icons/VerifiedUser";
 import { format } from "date-fns";
 import AlertDialog from "../AlertDialog";
-
-const mode = process.env.NODE_ENV;
-const serverUrl = process.env.SERVER_URL;
-const localUrl = process.env.LOCAL_URL || "http://localhost:5005";
-let url = mode === "production" ? serverUrl : localUrl;
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -133,7 +127,7 @@ export default function CampaignCard({ campaign, dashboard }) {
                 other={alert.other}
             />
             <Link
-                to={`${dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS}/${
+                to={`/${dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS}/${
                     campaign.id
                 }`}
                 className={classes.link}

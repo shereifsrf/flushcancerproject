@@ -54,8 +54,6 @@ export default function DonationsDash() {
         }
     }, [state]);
 
-    console.log(data.donations);
-
     return (
         <>
             <CssBaseline />

@@ -219,7 +219,7 @@ export default function Campaign() {
                     document,
                     editable: campaign.editable || false,
                     isVerifyDocument: campaign.isVerifyDocument,
-                    category,
+                    category: category.id,
                     newImage: null,
                 });
                 imgSrc.current = !isEmpty(document)
@@ -283,6 +283,7 @@ export default function Campaign() {
     const handleAlertOpen = () => {
         setAlert((alert) => ({ ...alert, open: !alert.open }));
     };
+    console.log(isEditable(), status.getCategoryListSuccess, data.categories);
 
     return (
         <>
@@ -413,42 +414,40 @@ export default function Campaign() {
                                         variant="outlined"
                                         // className={classes.formControl}
                                     >
-                                        {isEditable() &&
-                                            state.status
-                                                .getCategoryListSuccess &&
-                                            data.categories && (
-                                                <>
-                                                    <InputLabel id="label-category">
-                                                        Select Category
-                                                    </InputLabel>
-                                                    <Select
-                                                        labelId="label-category"
-                                                        name="category"
-                                                        value={data.category}
-                                                        label="Select Category"
-                                                        onChange={handleChange}
-                                                    >
-                                                        {data.categories.map(
-                                                            (category) => {
-                                                                return (
-                                                                    <MenuItem
-                                                                        key={
-                                                                            category.id
-                                                                        }
-                                                                        value={
-                                                                            category.id
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            category.name
-                                                                        }
-                                                                    </MenuItem>
-                                                                );
-                                                            }
-                                                        )}
-                                                    </Select>
-                                                </>
-                                            )}
+                                        {isEditable() && data.categories && (
+                                            <>
+                                                <InputLabel id="label-category">
+                                                    Select Category
+                                                </InputLabel>
+                                                <Select
+                                                    labelId="label-category"
+                                                    name="category"
+                                                    defaultValue={data.category}
+                                                    value={data.category}
+                                                    label="Select Category"
+                                                    onChange={handleChange}
+                                                >
+                                                    {data.categories.map(
+                                                        (category) => {
+                                                            return (
+                                                                <MenuItem
+                                                                    key={
+                                                                        category.id
+                                                                    }
+                                                                    value={
+                                                                        category.id
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        category.name
+                                                                    }
+                                                                </MenuItem>
+                                                            );
+                                                        }
+                                                    )}
+                                                </Select>
+                                            </>
+                                        )}
                                         {state.status
                                             .getCategoryListInProgress && (
                                             <Box
