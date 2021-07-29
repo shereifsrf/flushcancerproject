@@ -189,7 +189,7 @@ campaignSchema.method({
                 "categoryId",
                 "name",
                 "description",
-                // "document",
+                "document",
                 "limit",
                 "createdAt",
                 "updatedAt",
