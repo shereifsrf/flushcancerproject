@@ -455,11 +455,12 @@ export const deleteComment = (commentId, dispatch) => {
         });
 };
 
-export const getCampaignList = (dashboard, dispatch) => {
+export const getCampaignList = (dashboard, dispatch, query) => {
     instance
         .get(`campaigns`, {
             params: {
                 dashboard,
+                ...query,
             },
             headers: {
                 Authorization: `Bearer ${getLocalStorage().token.accessToken}`,

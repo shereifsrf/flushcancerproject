@@ -97,7 +97,7 @@ const App = () => {
                             <CampaignPublic />
                         </PrivateRoute>
                         <PrivateRoute exact path={`/${PUBLIC_CAMPAIGNS}`}>
-                            <TopNavDash />
+                            <TopNavDash dashboard={false} />
                             <CampaignList dashboard={false} />
                         </PrivateRoute>
                     </Switch>

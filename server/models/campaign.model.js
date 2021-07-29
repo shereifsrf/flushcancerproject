@@ -77,6 +77,14 @@ const campaignSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+campaignSchema.index({
+    name: "text",
+    description: "text",
+});
+
+campaignSchema.index({
+    categoryId: 1,
+});
 
 campaignSchema.statics = {
     async get(id) {
@@ -110,7 +118,7 @@ campaignSchema.statics = {
         }
     },
 
-    list({
+    async list({
         page = 1,
         perPage = 30,
         name,
@@ -119,6 +127,7 @@ campaignSchema.statics = {
         isVerified,
         minLimit,
         maxLimit,
+        search,
     }) {
         const limit =
             minLimit && maxLimit
@@ -134,6 +143,33 @@ campaignSchema.statics = {
             },
             isNil
         );
+
+        console.log(search);
+        let categories = [];
+
+        if (search) {
+            categories = await Category.find(
+                {
+                    $text: { $search: search },
+                },
+                "_id"
+            );
+
+            if (!isEmpty(categories)) {
+                options.$or = [
+                    {
+                        categoryId: {
+                            $in: categories.map((c) => c._id.toString()),
+                        },
+                    },
+                    { $text: { $search: search } },
+                ];
+            } else {
+                options["$text"] = { $search: search };
+            }
+        }
+
+        console.log("here", options);
 
         return this.find(options)
             .sort({ createdAt: -1 })
@@ -153,7 +189,7 @@ campaignSchema.method({
                 "categoryId",
                 "name",
                 "description",
-                "document",
+                // "document",
                 "limit",
                 "createdAt",
                 "updatedAt",

@@ -25,6 +25,7 @@ import { useAuthContext } from "../../AuthProvider";
 import { Link as RouterLink } from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
 import PublicIcon from "@material-ui/icons/Public";
+import { getCampaignList } from "../../../api";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -102,7 +103,7 @@ export default function TopNav() {
     const { dispatch } = useAuthContext();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-
+    const [search, setSearch] = React.useState("");
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -125,6 +126,16 @@ export default function TopNav() {
 
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // console.log(search);
+        history.push(`${DASHBOARD_URL}?search=${search}`);
+    };
+
+    const handleChange = (e) => {
+        setSearch(e.target.value);
     };
 
     const menuId = "primary-search-account-menu";
@@ -229,19 +240,24 @@ export default function TopNav() {
                             FlushCancer
                         </RouterLink>
                     </Typography>
-                    <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
+                    <form onSubmit={handleSubmit}>
+                        <div className={classes.search}>
+                            <div className={classes.searchIcon}>
+                                <SearchIcon />
+                            </div>
+                            <InputBase
+                                placeholder="Search…"
+                                value={search}
+                                name="search"
+                                onChange={handleChange}
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                inputProps={{ "aria-label": "search" }}
+                            />
                         </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{ "aria-label": "search" }}
-                        />
-                    </div>
+                    </form>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         {/* <IconButton

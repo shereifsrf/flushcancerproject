@@ -12,6 +12,11 @@ import CampaignCard from "./CampaignCard";
 import { clearStatus, getCampaignList } from "../../../api";
 import { useAuthContext } from "../../AuthProvider";
 import { isEmpty } from "lodash";
+import { useLocation } from "react-router-dom";
+
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -30,12 +35,18 @@ export default function CampaignList(props) {
     const [data, setData] = useState(initData);
     const { state, dispatch } = useAuthContext();
     const status = state.status;
-
+    const query = useQuery();
+    const search = query.get("search");
     useLayoutEffect(() => {
         clearStatus(dispatch);
-        getCampaignList(props.dashboard, dispatch);
+        console.log(search);
+        getCampaignList(
+            props.dashboard,
+            dispatch,
+            isEmpty(search) ? null : { search }
+        );
         setData({ ...data, loading: true });
-    }, []);
+    }, [search]);
 
     useLayoutEffect(() => {
         if (data.loading) {

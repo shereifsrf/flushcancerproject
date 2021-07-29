@@ -30,6 +30,8 @@ const categorySchema = new mongoose.Schema(
     }
 );
 
+categorySchema.index({ name: "text" });
+
 categorySchema.statics = {
     async get(id) {
         try {
