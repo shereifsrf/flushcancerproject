@@ -298,7 +298,7 @@ export const updateCampaign = (campaignId, data, dispatch) => {
     formData.append("name", data.name || "");
     formData.append("description", data.description || "");
     formData.append("limit", data.limit || 0);
-    formData.append("categoryId", data.category.id || "");
+    formData.append("categoryId", data.category || "");
     formData.append("expiresAt", data.expiresAt || "");
 
     if (data.imageChanged) formData.append("document", data.document);

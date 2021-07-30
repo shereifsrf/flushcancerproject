@@ -188,6 +188,7 @@ export default function Campaign() {
     }, [isCreate]);
 
     const handleChange = (e) => {
+        console.log(data);
         if (e["expiresAt"]) {
             return setData({ ...data, expiresAt: e["expiresAt"] });
         }

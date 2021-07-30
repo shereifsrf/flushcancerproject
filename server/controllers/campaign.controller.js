@@ -68,6 +68,7 @@ exports.list = async (req, res, next) => {
             };
             // console.log("here", query);
         }
+
         if (query.categoryId) {
             query.categoryId = mongoose.Types.ObjectId(query.categoryId);
         }
