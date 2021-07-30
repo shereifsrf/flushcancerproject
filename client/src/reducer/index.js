@@ -741,6 +741,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearProofStatus,
+                    ...clearCampaignStatus,
                     getProofListSuccess: true,
                 },
             };
