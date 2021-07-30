@@ -33,7 +33,6 @@ export default function DonationsDash() {
     const { state, dispatch } = useAuthContext();
     const [data, setData] = useState(initData);
     const status = state.status;
-    const history = useHistory();
 
     useLayoutEffect(() => {
         getDonationList(dispatch);
@@ -48,8 +47,6 @@ export default function DonationsDash() {
                     donations: state.donations,
                     loading: false,
                 });
-            } else if (status.getDonationListFailed) {
-                redirectToPublicCampaign();
             }
         }
     }, [state]);
@@ -89,43 +86,39 @@ export default function DonationsDash() {
                             No donations found at the moment
                         </Typography>
                     )}
-                {status.getDonationListSuccess && (
+                {!isEmpty(data.donations) && (
                     <List className={classes.root}>
-                        {!isEmpty(data.donations) &&
-                            data.donations.map((donation) => {
-                                // console.log(donation);
-                                return (
-                                    <div key={donation.id}>
-                                        <ListItem alignItems="flex-start">
-                                            <ListItemAvatar>
-                                                <ReceiptIcon />
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary={donation.campaign.name}
-                                                secondary={
-                                                    <React.Fragment>
-                                                        <Typography
-                                                            component="span"
-                                                            variant="body2"
-                                                            className={
-                                                                classes.inline
-                                                            }
-                                                            color="textPrimary"
-                                                        >
-                                                            Donation: $
-                                                        </Typography>
-                                                        {donation.amount}
-                                                    </React.Fragment>
-                                                }
-                                            />
-                                        </ListItem>
-                                        <Divider
-                                            variant="inset"
-                                            component="li"
+                        {data.donations.map((donation) => {
+                            // console.log(donation);
+                            return (
+                                <div key={donation.id}>
+                                    <ListItem alignItems="flex-start">
+                                        <ListItemAvatar>
+                                            <ReceiptIcon />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={donation.campaign.name}
+                                            secondary={
+                                                <React.Fragment>
+                                                    <Typography
+                                                        component="span"
+                                                        variant="body2"
+                                                        className={
+                                                            classes.inline
+                                                        }
+                                                        color="textPrimary"
+                                                    >
+                                                        Donation: $
+                                                    </Typography>
+                                                    {donation.amount}
+                                                </React.Fragment>
+                                            }
                                         />
-                                    </div>
-                                );
-                            })}
+                                    </ListItem>
+                                    <Divider variant="inset" component="li" />
+                                </div>
+                            );
+                        })}
                     </List>
                 )}
             </Container>

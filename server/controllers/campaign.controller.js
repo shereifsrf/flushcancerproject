@@ -64,16 +64,37 @@ exports.list = async (req, res, next) => {
             // console.log("here", query);
             query = {
                 ...omit(query, ["dashboard", "isVerified"]),
-                userId: req.user.id,
+                userId: req.user._id,
             };
             // console.log("here", query);
         }
+        if (query.categoryId) {
+            query.categoryId = mongoose.Types.ObjectId(query.categoryId);
+        }
+
         const campaigns = await Campaign.list(query);
-        const transformedCampaigns = await Promise.all(
-            campaigns.map((campaign) => campaign.transform(req.user))
-        );
-        res.json(transformedCampaigns);
+
+        let transformedCampaigns = {};
+        let total = 0;
+
+        if (!isEmpty(campaigns)) {
+            if (!isEmpty(campaigns[0].campaigns)) {
+                transformedCampaigns = await Promise.all(
+                    campaigns[0].campaigns.map((campaign) =>
+                        new Campaign(campaign).transform(req.user)
+                    )
+                );
+            }
+            if (!isEmpty(campaigns[0].total)) {
+                total = campaigns[0].total[0].total;
+            }
+        }
+        res.json({
+            campaigns: transformedCampaigns,
+            total,
+        });
     } catch (error) {
+        // console.log(error);
         next(error);
     }
 };

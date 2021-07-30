@@ -120,7 +120,7 @@ campaignSchema.statics = {
 
     async list({
         page = 1,
-        perPage = 30,
+        perPage = 15,
         name,
         userId,
         categoryId,
@@ -129,10 +129,25 @@ campaignSchema.statics = {
         maxLimit,
         search,
     }) {
-        const limit =
-            minLimit && maxLimit
-                ? { $gte: minLimit, $lte: maxLimit }
-                : undefined;
+        let limit = {};
+
+        page = parseInt(page);
+        perPage = parseInt(perPage);
+        minLimit = parseFloat(minLimit);
+        maxLimit = parseFloat(maxLimit);
+
+        if (!maxLimit && !minLimit) {
+            limit = undefined;
+        } else if (maxLimit === 0) {
+            limit = { $gte: minLimit };
+        } else if (minLimit === 0) {
+            limit = { $lte: maxLimit };
+        } else {
+            limit =
+                minLimit && maxLimit
+                    ? { $gte: minLimit, $lte: maxLimit }
+                    : undefined;
+        }
         const options = omitBy(
             {
                 name,
@@ -159,23 +174,29 @@ campaignSchema.statics = {
                 options.$or = [
                     {
                         categoryId: {
-                            $in: categories.map((c) => c._id.toString()),
+                            $in: categories.map((c) => c._id),
                         },
                     },
-                    { $text: { $search: search } },
                 ];
             } else {
                 options["$text"] = { $search: search };
             }
         }
 
-        console.log("here", options);
-
-        return this.find(options)
-            .sort({ createdAt: -1 })
-            .skip(perPage * (page - 1))
-            .limit(perPage)
-            .exec();
+        return (
+            this.aggregate()
+                .match(options)
+                // .project({ document: 0 })
+                .facet({
+                    campaigns: [
+                        { $skip: perPage * (page - 1) },
+                        { $limit: perPage },
+                        { $sort: { createdAt: -1 } },
+                    ],
+                    total: [{ $count: "total" }],
+                })
+                .exec()
+        );
     },
 };
 

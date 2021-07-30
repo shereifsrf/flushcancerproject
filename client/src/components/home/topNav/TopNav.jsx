@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { alpha, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -14,7 +14,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import {
     CAMPAIGNS_URL,
     DASHBOARD_URL,
@@ -25,7 +25,9 @@ import { useAuthContext } from "../../AuthProvider";
 import { Link as RouterLink } from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
 import PublicIcon from "@material-ui/icons/Public";
-import { getCampaignList } from "../../../api";
+import { Box, Button } from "@material-ui/core";
+import DrawerFilter from "./DrawerFilter";
+import { useDashContext } from "../../general/DashProvider";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -97,15 +99,17 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function TopNav() {
+export default function TopNav(props) {
     const history = useHistory();
     const classes = useStyles();
     const { dispatch } = useAuthContext();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-    const [search, setSearch] = React.useState("");
+    const { data: dashData, setData: setDashData } = useDashContext();
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+    const [filter, setFilter] = useState(false);
+    const [search, setSearch] = useState(dashData.search || "");
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -131,11 +135,19 @@ export default function TopNav() {
     const handleSubmit = (e) => {
         e.preventDefault();
         // console.log(search);
-        history.push(`${DASHBOARD_URL}?search=${search}`);
+        setDashData({ ...dashData, search, trigger: true });
     };
 
     const handleChange = (e) => {
         setSearch(e.target.value);
+    };
+
+    useLayoutEffect(() => {
+        setSearch("");
+    }, [props.dashboard]);
+
+    const handleFilter = () => {
+        setFilter((filter) => !filter);
     };
 
     const menuId = "primary-search-account-menu";
@@ -241,41 +253,36 @@ export default function TopNav() {
                         </RouterLink>
                     </Typography>
                     <form onSubmit={handleSubmit}>
-                        <div className={classes.search}>
-                            <div className={classes.searchIcon}>
-                                <SearchIcon />
+                        <Box display="flex">
+                            <div className={classes.search}>
+                                <div className={classes.searchIcon}>
+                                    <SearchIcon />
+                                </div>
+                                <InputBase
+                                    placeholder="Search…"
+                                    value={search}
+                                    name="search"
+                                    onChange={handleChange}
+                                    classes={{
+                                        root: classes.inputRoot,
+                                        input: classes.inputInput,
+                                    }}
+                                    inputProps={{ "aria-label": "search" }}
+                                />
                             </div>
-                            <InputBase
-                                placeholder="Search…"
-                                value={search}
-                                name="search"
-                                onChange={handleChange}
-                                classes={{
-                                    root: classes.inputRoot,
-                                    input: classes.inputInput,
-                                }}
-                                inputProps={{ "aria-label": "search" }}
-                            />
-                        </div>
+                            <Box>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={handleFilter}
+                                >
+                                    Filters
+                                </Button>
+                            </Box>
+                        </Box>
                     </form>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
-                        {/* <IconButton
-                            aria-label="show 4 new mails"
-                            color="inherit"
-                            >
-                            <Badge badgeContent={4} color="secondary">
-                            <MailIcon />
-                            </Badge>
-                            </IconButton>
-                            <IconButton
-                            aria-label="show 17 new notifications"
-                            color="inherit"
-                            >
-                            <Badge badgeContent={17} color="secondary">
-                            <NotificationsIcon />
-                            </Badge>
-                        </IconButton> */}
                         <IconButton
                             edge="end"
                             aria-label="account of current user"
@@ -319,6 +326,7 @@ export default function TopNav() {
             </AppBar>
             {renderMobileMenu}
             {renderMenu}
+            <DrawerFilter open={filter} setOpen={handleFilter} />
         </div>
     );
 }

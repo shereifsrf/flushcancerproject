@@ -372,7 +372,8 @@ export const reducer = (state, action) => {
             return {
                 ...state,
                 ...clearError,
-                campaigns: data,
+                campaigns: data.campaigns,
+                totalCampaigns: data.total,
                 status: {
                     ...state.status,
                     ...clearCampaignStatus,
@@ -385,6 +386,7 @@ export const reducer = (state, action) => {
                 ...state,
                 hasError: true,
                 message: data.message,
+                totalCampaigns: 0,
                 campaigns: null,
                 status: {
                     ...state.status,

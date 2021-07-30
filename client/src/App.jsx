@@ -21,6 +21,7 @@ import ActionProvider from "./components/general/ActionContext";
 import AuthProvider, { useAuthContext } from "./components/AuthProvider";
 import UserVerification from "./components/general/userVerification/UserVerification";
 import { CAMPAIGNS_URL, DASHBOARD_URL, PUBLIC_CAMPAIGNS } from "./constants";
+import DashProvider from "./components/general/DashProvider";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -70,36 +71,38 @@ const App = () => {
                         <Route exact path="/user-verify/:refreshToken">
                             <UserVerification />
                         </Route>
-                        <PrivateRoute exact path={`/${DASHBOARD_URL}`}>
-                            <TopNavDash />
-                            <MainDash />
-                        </PrivateRoute>
-                        <PrivateRoute exact path="/profile">
-                            <TopNavDash />
-                            <Profile />
-                        </PrivateRoute>
-                        <PrivateRoute
-                            exact
-                            path={`/${CAMPAIGNS_URL}/:campaignId`}
-                        >
-                            <TopNavDash />
-                            <Campaign />
-                        </PrivateRoute>
-                        <PrivateRoute exact path={`/${CAMPAIGNS_URL}`}>
-                            <TopNavDash />
-                            <Campaign />
-                        </PrivateRoute>
-                        <PrivateRoute
-                            exact
-                            path={`/${PUBLIC_CAMPAIGNS}/:campaignId`}
-                        >
-                            <TopNavDash />
-                            <CampaignPublic />
-                        </PrivateRoute>
-                        <PrivateRoute exact path={`/${PUBLIC_CAMPAIGNS}`}>
-                            <TopNavDash dashboard={false} />
-                            <CampaignList dashboard={false} />
-                        </PrivateRoute>
+                        <DashProvider>
+                            <PrivateRoute exact path={`/${DASHBOARD_URL}`}>
+                                <TopNavDash />
+                                <MainDash />
+                            </PrivateRoute>
+                            <PrivateRoute exact path="/profile">
+                                <TopNavDash />
+                                <Profile />
+                            </PrivateRoute>
+                            <PrivateRoute
+                                exact
+                                path={`/${CAMPAIGNS_URL}/:campaignId`}
+                            >
+                                <TopNavDash />
+                                <Campaign />
+                            </PrivateRoute>
+                            <PrivateRoute exact path={`/${CAMPAIGNS_URL}`}>
+                                <TopNavDash />
+                                <Campaign />
+                            </PrivateRoute>
+                            <PrivateRoute
+                                exact
+                                path={`/${PUBLIC_CAMPAIGNS}/:campaignId`}
+                            >
+                                <TopNavDash />
+                                <CampaignPublic />
+                            </PrivateRoute>
+                            <PrivateRoute exact path={`/${PUBLIC_CAMPAIGNS}`}>
+                                <TopNavDash dashboard={false} />
+                                <CampaignList dashboard={false} />
+                            </PrivateRoute>
+                        </DashProvider>
                     </Switch>
                     <Footer />
                 </div>

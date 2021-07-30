@@ -7,16 +7,13 @@ import {
     CircularProgress,
     Typography,
 } from "@material-ui/core";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import CampaignCard from "./CampaignCard";
-import { clearStatus, getCampaignList } from "../../../api";
 import { useAuthContext } from "../../AuthProvider";
 import { isEmpty } from "lodash";
-import { useLocation } from "react-router-dom";
-
-function useQuery() {
-    return new URLSearchParams(useLocation().search);
-}
+import PaginationCampaign from "./PaginationCampaign";
+import { useDashContext } from "../DashProvider";
+import setDayWithOptions from "date-fns/esm/fp/setDayWithOptions/index.js";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -26,34 +23,27 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const initData = {
-    loading: false,
     campaigns: [],
 };
 
 export default function CampaignList(props) {
     const classes = useStyles();
     const [data, setData] = useState(initData);
-    const { state, dispatch } = useAuthContext();
+    const { state } = useAuthContext();
     const status = state.status;
-    const query = useQuery();
-    const search = query.get("search");
-    useLayoutEffect(() => {
-        clearStatus(dispatch);
-        console.log(search);
-        getCampaignList(
-            props.dashboard,
-            dispatch,
-            isEmpty(search) ? null : { search }
-        );
-        setData({ ...data, loading: true });
-    }, [search]);
+    const { data: dashData } = useDashContext();
 
     useLayoutEffect(() => {
-        if (data.loading) {
+        if (dashData.loading) {
             if (status.getCampaignListSuccess) {
                 setData({
                     ...data,
-                    loading: false,
+                    campaigns: state.campaigns,
+                });
+            } else if (status.getCampaignListFailed) {
+                console.log(state.message);
+                setData({
+                    ...data,
                     campaigns: state.campaigns,
                 });
             }
@@ -77,12 +67,7 @@ export default function CampaignList(props) {
                         </Typography>
                     </Container>
                 </div>
-                {data.loading && (
-                    <Box justifyContent="center" display="flex">
-                        <CircularProgress />
-                    </Box>
-                )}
-                {!data.loading &&
+                {!dashData.loading &&
                     (status.getCampaignListFailed ||
                         isEmpty(data.campaigns)) && (
                         <Typography
@@ -116,6 +101,15 @@ export default function CampaignList(props) {
                             })}
                     </Grid>
                 )}
+
+                {dashData.loading && (
+                    <Box justifyContent="center" display="flex">
+                        <CircularProgress />
+                    </Box>
+                )}
+                <Box display="flex" justifyContent="center" flexGrow={1}>
+                    <PaginationCampaign dashboard={props.dashboard} />
+                </Box>
             </Container>
         </>
     );
