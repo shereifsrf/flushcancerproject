@@ -148,7 +148,8 @@ export default function CampaignPublic() {
                 loading: false,
                 likable: false,
                 id: state.like.id,
-                total: ++like.total,
+                total:
+                    !isEmpty(like.total) || like.total === 0 ? ++like.total : 1,
             });
         } else if (status.deleteLikeSuccess) {
             setLike({
@@ -156,7 +157,7 @@ export default function CampaignPublic() {
                 loading: false,
                 likable: true,
                 id: undefined,
-                total: --like.total,
+                total: !isEmpty(like.total) ? --like.total : 0,
             });
         }
     }, [state]);
