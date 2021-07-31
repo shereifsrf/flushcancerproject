@@ -108,8 +108,8 @@ export default function CampaignCard({ campaign, dashboard }) {
             open: true,
             title: `${campaign.name} Link`,
             contentText: `${window.origin}/${
-                (dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS) + campaign.id
-            }`,
+                dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS
+            } + ${campaign.id}`,
             buttonText: "Great",
         });
     };
