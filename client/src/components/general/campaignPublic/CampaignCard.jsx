@@ -19,11 +19,7 @@ import { Link } from "react-router-dom";
 import { useLayoutEffect } from "react";
 import { isEmpty } from "lodash";
 import { Buffer } from "buffer";
-import {
-    PUBLIC_CAMPAIGNS,
-    CAMPAIGNS_URL,
-    DASHBOARD_URL,
-} from "../../../constants";
+import { PUBLIC_CAMPAIGNS, CAMPAIGNS_URL } from "../../../constants";
 import LockIcon from "@material-ui/icons/Lock";
 import VerifiedUserIcon from "@material-ui/icons/VerifiedUser";
 import { format } from "date-fns";
@@ -112,7 +108,7 @@ export default function CampaignCard({ campaign, dashboard }) {
             open: true,
             title: `${campaign.name} Link`,
             contentText: `${window.origin}/${
-                (dashboard ? DASHBOARD_URL : PUBLIC_CAMPAIGNS) + campaign.id
+                (dashboard ? CAMPAIGNS_URL : PUBLIC_CAMPAIGNS) + campaign.id
             }`,
             buttonText: "Great",
         });
