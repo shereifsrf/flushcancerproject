@@ -90,6 +90,7 @@ export default function PaginationCampaign(props) {
                 });
 
                 if (
+                    state.totalCampaigns !== 0 &&
                     data.page > Math.ceil(state.totalCampaigns / data.perPage)
                 ) {
                     setDashData({ ...dashData, trigger: true });
