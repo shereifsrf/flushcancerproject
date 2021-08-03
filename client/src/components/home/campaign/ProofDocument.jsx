@@ -1,6 +1,7 @@
 import { Box, Button, CircularProgress, makeStyles } from "@material-ui/core";
 import { CloudUpload } from "@material-ui/icons";
 import { Buffer } from "buffer";
+import { differenceInDays } from "date-fns";
 import { isEmpty } from "lodash";
 import React, { useState } from "react";
 import { useLayoutEffect } from "react";
@@ -52,6 +53,7 @@ export default function ProofDocument({ campaignId }) {
                         return {
                             imgSrc: getImgSrc(proof.document),
                             id: proof.id,
+                            createdAt: proof.createdAt,
                         };
                     }),
                     loading: false,
@@ -164,22 +166,31 @@ export default function ProofDocument({ campaignId }) {
             <Box pt={2}>
                 {!isEmpty(data.proofs) &&
                     data.proofs.map((proof) => {
+                        console.log(proof);
                         return (
                             <Box key={proof.id} mb={2}>
                                 <img
                                     className={classes.image}
                                     src={proof.imgSrc}
                                 />{" "}
-                                <Box display="flex" justifyContent="flex-end">
-                                    <Button
-                                        color="secondary"
-                                        variant="outlined"
-                                        name={proof.id}
-                                        onClick={handleDelete}
+                                {differenceInDays(
+                                    new Date(proof.createdAt),
+                                    Date.now()
+                                ) > -1 && (
+                                    <Box
+                                        display="flex"
+                                        justifyContent="flex-end"
                                     >
-                                        Delete
-                                    </Button>
-                                </Box>
+                                        <Button
+                                            color="secondary"
+                                            variant="outlined"
+                                            name={proof.id}
+                                            onClick={handleDelete}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Box>
+                                )}
                             </Box>
                         );
                     })}

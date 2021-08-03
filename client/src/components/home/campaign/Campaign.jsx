@@ -30,12 +30,13 @@ import {
     updateCampaign,
     createCampaign,
     deleteCampaign,
+    clearStatus,
 } from "../../../api";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useLayoutEffect } from "react";
 import { Buffer } from "buffer";
 import { useRef } from "react";
-import { DASHBOARD_URL } from "../../../constants";
+import { CAMPAIGNS_URL, DASHBOARD_URL } from "../../../constants";
 import AlertDialog from "../../general/AlertDialog";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ProofDocument from "./ProofDocument";
@@ -160,15 +161,18 @@ export default function Campaign() {
                 setAlert({
                     open: true,
                     title: "Campaign Created",
-                    contentText: `Campaign '${state.campaign.name}' successfully created `,
-                    buttonText: "Great",
-                    buttonFn: () => history.replace(`/${DASHBOARD_URL}`),
+                    contentText: `Campaign '${state.campaign.name}' successfully created. Please upload proof document. `,
+                    buttonText: "Alright",
+                    buttonFn: () => {
+                        clearStatus(dispatch);
+                        history.push(`/${CAMPAIGNS_URL}/${state.campaign.id}`);
+                    },
                 });
             } else if (state.status.deleteCampaignSuccess) {
                 setAlert({
                     open: true,
                     title: "Campaign Deleted",
-                    contentText: `Campaign '${state.campaign.name}' successfully deleted `,
+                    contentText: `Campaign successfully deleted `,
                     buttonText: "Great",
                     buttonFn: () => history.replace(`/${DASHBOARD_URL}`),
                 });
@@ -188,7 +192,7 @@ export default function Campaign() {
     }, [isCreate]);
 
     const handleChange = (e) => {
-        console.log(data);
+        // console.log(data);
         if (e["expiresAt"]) {
             return setData({ ...data, expiresAt: e["expiresAt"] });
         }
@@ -542,8 +546,11 @@ export default function Campaign() {
                                     </FormControl>
                                 </div>
                                 <Divider className={classes.divider} />
-                                {!isCreate && data.isVerifyDocument && (
-                                    <ProofDocument campaignId={campaignId} />
+                                {!isCreate && (
+                                    <ProofDocument
+                                        campaignId={campaignId}
+                                        isVerifyDocument={data.isVerifyDocument}
+                                    />
                                 )}
                                 {isEditable() && (
                                     <Grid

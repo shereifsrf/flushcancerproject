@@ -4,6 +4,7 @@ const {
     ADMIN,
     ADMIN_ONLY_REPLACABLE_PROOF_FDS,
 } = require("../config/constants");
+const Campaign = require("../models/campaign.model");
 const CampaignProof = require("../models/campaign.proof.model");
 
 /**
@@ -30,6 +31,18 @@ exports.create = async (req, res, next) => {
                 data: req.file.buffer,
                 contentType: req.file.mimetype,
             };
+        }
+
+        if (req.body && req.body.campaignId) {
+            try {
+                const campaign = await Campaign.get(req.body.campaignId);
+                if (campaign.isVerifyDocument === true) {
+                    campaign.isVerifyDocument = false;
+                    campaign.save().catch((e) => next(e));
+                }
+            } catch (error) {
+                return next(error);
+            }
         }
 
         req.body.createdBy = req.user._id;
@@ -89,13 +102,31 @@ exports.update = (req, res, next) => {
     }
 };
 
-exports.remove = (req, res, next) => {
+exports.remove = async (req, res, next) => {
     const { campaignProof } = req.locals;
 
-    campaignProof
-        .remove()
-        .then(() => res.status(httpStatus.OK).end())
-        .catch((e) => next(e));
+    if (campaignProof && campaignProof.campaignId.id) {
+        try {
+            campaignProof
+                .remove()
+                .then(async () => await res.status(httpStatus.OK).end())
+                .catch((e) => next(e));
+            const campaign = await Campaign.get(campaignProof.campaignId.id);
+            console.log(campaign);
+            if (campaign.isVerifyDocument === false) {
+                const count = await CampaignProof.countDocuments({
+                    campaignId: campaignProof.campaignId,
+                }).exec();
+                console.log(count);
+                if (count <= 0) {
+                    campaign.isVerifyDocument = true;
+                    campaign.save().catch((e) => next(e));
+                }
+            }
+        } catch (error) {
+            return next(error);
+        }
+    }
 };
 
 exports.get = (req, res) => res.json(req.locals.campaignProof.transform());

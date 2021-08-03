@@ -222,6 +222,7 @@ export const reducer = (state, action) => {
                     ...state.status,
                     ...clearCommentStatus,
                     ...clearLikeStatus,
+                    ...clearCampaignStatus,
                     getCampaignSuccess: true,
                     getCampaignFailed: false,
                     getCampaignInProgress: false,
@@ -236,6 +237,7 @@ export const reducer = (state, action) => {
                 status: {
                     ...state.status,
                     ...clearCommentStatus,
+                    ...clearCampaignStatus,
                     ...clearLikeStatus,
                     getCampaignSuccess: false,
                     getCampaignFailed: true,

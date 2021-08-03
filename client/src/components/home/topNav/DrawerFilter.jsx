@@ -59,7 +59,7 @@ export default function DrawerFilter({ open, setOpen }) {
     useLayoutEffect(() => {
         if (data.loading) {
             if (state.status.getCategoryListSuccess) {
-                console.log(state.categories);
+                // console.log(state.categories);
                 setData({
                     ...data,
                     loading: false,

@@ -96,6 +96,7 @@ campaignSchema.statics = {
                     .populate("categoryId")
                     .populate("userId")
                     .exec();
+                console.log("here");
 
                 // const campaign = await Campaign.findById(
                 //     "60ea6a073afc6d5a34e1a193"
