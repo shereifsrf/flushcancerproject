@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dec": "nodemon index.js",
+        "dev": "nodemon index.js",
         "start": "pm2 start ecosystem.config.json --no-daemon",
         "build-prod": "node index.js",
         "postbuild": "npm i"

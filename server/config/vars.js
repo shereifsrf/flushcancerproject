@@ -22,6 +22,8 @@ module.exports = {
         port: process.env.EMAIL_PORT,
         username: process.env.EMAIL_USERNAME,
         password: process.env.EMAIL_PASSWORD,
-        accessToken: process.env.EMAIL_ACCESS_TOKKEN,
+        refreshToken: process.env.EMAIL_REFRESH_TOKEN,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
 };

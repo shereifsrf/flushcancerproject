@@ -148,8 +148,7 @@ export default function CampaignPublic() {
                 loading: false,
                 likable: false,
                 id: state.like.id,
-                total:
-                    !isEmpty(like.total) || like.total !== 0 ? ++like.total : 1,
+                total: like.total ? ++like.total : 1,
             });
         } else if (status.deleteLikeSuccess) {
             setLike({
@@ -157,8 +156,7 @@ export default function CampaignPublic() {
                 loading: false,
                 likable: true,
                 id: undefined,
-                total:
-                    !isEmpty(like.total) || like.total !== 0 ? --like.total : 0,
+                total: like.total ? --like.total : 0,
             });
         }
     }, [state]);
@@ -230,13 +228,18 @@ export default function CampaignPublic() {
                 user: campaign.user || data.user,
                 comments: campaign.comments || data.comments,
             });
+            console.log(campaign.totalLikes);
+
             const val = mapValues(_.keyBy(campaign.comments, "id"), "comment");
             setField(val);
             setLike({
                 ...like,
-                likable: campaign.like.likable,
+                likable:
+                    campaign.like.likable !== undefined
+                        ? campaign.like.likable
+                        : true,
                 id: campaign.like.likeId || like.id,
-                total: campaign.totalLikes || data.totalLikes,
+                total: campaign.totalLikes || like.total,
             });
             setDonate({ ...donate, totalDonation: campaign.totalDonation });
         }
@@ -389,7 +392,6 @@ export default function CampaignPublic() {
                                                     classes.donationField
                                                 }
                                                 id="outlined-adornment-amount"
-                                                defaultValue="0"
                                                 name="amount"
                                                 value={donate.donation}
                                                 onChange={(e) =>
@@ -516,7 +518,7 @@ export default function CampaignPublic() {
                                         onChange={handleChange}
                                         fullWidth
                                         multiline
-                                        rows={3}
+                                        minRows={3}
                                         value={data.comment}
                                         variant="outlined"
                                     />
@@ -570,7 +572,7 @@ export default function CampaignPublic() {
                                                             name={comment.id}
                                                             fullWidth
                                                             multiline
-                                                            rows={4}
+                                                            minRows={4}
                                                             maxRows={10}
                                                             onChange={
                                                                 handleCommentChange

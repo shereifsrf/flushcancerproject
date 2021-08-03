@@ -14,13 +14,15 @@ const domainUrl =
 // such as an email service API or nodemailer-sendgrid-transport
 
 const transporter = nodemailer.createTransport({
-    port: emailConfig.port,
-    host: emailConfig.host,
-    secure: true,
+    service: "gmail",
+    // secure: true,
     auth: {
-        // type: "OAuth2",
+        type: "oauth2",
         user: emailConfig.username,
-        pass: emailConfig.password,
+        clientId: emailConfig.clientId,
+        clientSecret: emailConfig.clientSecret,
+        refreshToken: emailConfig.refreshToken,
+        // pass: emailConfig.password,
     },
 });
 
