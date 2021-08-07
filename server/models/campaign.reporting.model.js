@@ -19,6 +19,11 @@ const campaignReportingSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        isChecked: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -27,11 +32,6 @@ const campaignReportingSchema = new mongoose.Schema(
         updatedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-        },
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
         },
     },
     {
