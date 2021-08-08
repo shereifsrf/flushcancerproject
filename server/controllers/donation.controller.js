@@ -4,6 +4,7 @@ const { ADMIN } = require("../config/constants");
 const Campaign = require("../models/campaign.model");
 const Donation = require("../models/donation.model");
 const APIError = require("../utils/APIError");
+const emailProvider = require("../services/emails/emailProvider");
 
 /**
  * Load user and append to req.
@@ -33,7 +34,7 @@ exports.create = async (req, res, next) => {
 
         const campaign = await Campaign.find(
             { _id: req.body.campaignId },
-            { isVerified: 1 }
+            { isVerified: 1, name: 1 }
         ).exec();
 
         // console.log("herer", campaign);
@@ -47,6 +48,12 @@ exports.create = async (req, res, next) => {
         const savedDonation = await donation.save();
         res.status(httpStatus.CREATED);
         res.json(await savedDonation.transform(savedDonation.campaignId));
+        emailProvider.sendDonationAckThanks({
+            userName: req.user.name,
+            name: campaign[0].name,
+            amount: parseFloat(req.body.amount),
+            userEmail: req.user.email,
+        });
     } catch (error) {
         next(Donation.checkDuplicateInsert(error));
     }

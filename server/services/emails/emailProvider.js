@@ -63,6 +63,34 @@ exports.sendPasswordReset = async (passwordResetObject) => {
         .catch(() => console.log("error sending password reset email"));
 };
 
+exports.sendDonationAckThanks = async (donationAckObj) => {
+    const email = new Email({
+        views: { root: __dirname },
+        message: {
+            from: "flushcancerproject@gmail.com",
+        },
+        // uncomment below to send emails in development/test env:
+        send: true,
+        preview: false,
+        transport: transporter,
+    });
+
+    email
+        .send({
+            template: "donationAckThanks",
+            message: {
+                to: donationAckObj.userEmail,
+            },
+            locals: {
+                productName: "Flush Cancer Project",
+                userName: donationAckObj.userName,
+                campaign: donationAckObj.name,
+                donated: donationAckObj.amount,
+            },
+        })
+        .catch((e) => console.log("error sending donation ack email", e));
+};
+
 exports.sendEmailVerification = async (emailVerObj) => {
     const email = new Email({
         views: { root: __dirname },
