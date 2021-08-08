@@ -63,8 +63,17 @@ export default function ProofDocument({ campaignId }) {
                 const imgSrc = getImgSrc(proof.document);
                 setData({
                     ...data,
-                    proofs: [...data.proofs, { imgSrc, id: proof.id }],
+                    proofs: [
+                        ...data.proofs,
+                        { imgSrc, id: proof.id, createdAt: proof.createdAt },
+                    ],
                     loading: false,
+                });
+                setAlert({
+                    open: true,
+                    title: "Confirmation",
+                    contentText: `Uploaded Proof Document successfully `,
+                    buttonText: "Thanks",
                 });
             } else if (state.status.deleteProofSuccess) {
                 setData({
@@ -73,6 +82,12 @@ export default function ProofDocument({ campaignId }) {
                         (proof) => proof.id !== data.proofToDelete
                     ),
                     loading: false,
+                });
+                setAlert({
+                    open: true,
+                    title: "Confirmation",
+                    contentText: `Deleted Proof Document successfully `,
+                    buttonText: "Alright",
                 });
             }
         }
@@ -166,7 +181,6 @@ export default function ProofDocument({ campaignId }) {
             <Box pt={2}>
                 {!isEmpty(data.proofs) &&
                     data.proofs.map((proof) => {
-                        console.log(proof);
                         return (
                             <Box key={proof.id} mb={2}>
                                 <img

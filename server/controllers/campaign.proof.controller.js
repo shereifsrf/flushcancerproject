@@ -112,12 +112,12 @@ exports.remove = async (req, res, next) => {
                 .then(async () => await res.status(httpStatus.OK).end())
                 .catch((e) => next(e));
             const campaign = await Campaign.get(campaignProof.campaignId.id);
-            console.log(campaign);
+            // console.log(campaign);
             if (campaign.isVerifyDocument === false) {
                 const count = await CampaignProof.countDocuments({
                     campaignId: campaignProof.campaignId,
                 }).exec();
-                console.log(count);
+                // console.log(count);
                 if (count <= 0) {
                     campaign.isVerifyDocument = true;
                     campaign.save().catch((e) => next(e));
