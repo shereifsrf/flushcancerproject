@@ -9,6 +9,7 @@ const campaignComments = require("./campaign.comment.route");
 const campaignProofs = require("./campaign.proof.route");
 const campaignRatings = require("./campaign.rating.route");
 const campaignReportings = require("./campaign.reporting.route");
+const campaignApprovals = require("./campaign.approval.route");
 const tester = require("./tester.route");
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.use("/campaigncomments", campaignComments);
 router.use("/campaignproofs", campaignProofs);
 router.use("/campaignratings", campaignRatings);
 router.use("/campaignreportings", campaignReportings);
+router.use("/campaignapprovals", campaignApprovals);
 router.use("/tester", tester);
 
 module.exports = router;

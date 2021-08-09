@@ -12,6 +12,7 @@ const User = require("../models/user.model");
 const mongoose = require("mongoose");
 const CampaignRating = require("../models/campaign.rating.model");
 const Donation = require("../models/donation.model");
+const CampaignApproval = require("../models/campaign.approval.model");
 
 /**
  * Load user and append to req.
@@ -129,18 +130,55 @@ exports.update = async (req, res, next) => {
                 }
             }
         }
+        if (campaign.isVerified) {
+            //get the campaign-approval form and update there
+            let campaignApproval = await CampaignApproval.findOne({
+                campaignId: campaign.id,
+            }).exec();
 
-        const updatedCampaign = omit(req.body, ommitFields);
-        campaign.updatedBy = userInCharge._id;
+            if (campaignApproval && campaignApproval.isApproved) {
+                Object.assign(campaignApproval, {
+                    ...req.body,
+                    isApproved: false,
+                });
+                campaignApproval
+                    .save()
+                    .then(async (savedCampaignApproval) =>
+                        res.json(await savedCampaignApproval.transform())
+                    )
+                    .catch((e) => next(e));
+            } else {
+                //create campaign approval
 
-        Object.assign(campaign, updatedCampaign);
+                let toSaveCampaignApproval = omit(campaign, [
+                    "createdAt",
+                    "updatedAt",
+                    "updatedBy",
+                    ...ommitFields,
+                ]);
+                Object.assign(toSaveCampaignApproval, req.body);
+                toSaveCampaignApproval.campaignId = toSaveCampaignApproval.id;
+                delete toSaveCampaignApproval.id;
+                campaignApproval = new CampaignApproval(toSaveCampaignApproval)
+                    .save()
+                    .then(async (savedCampaignApproval) =>
+                        res.json(await savedCampaignApproval.transform())
+                    )
+                    .catch((e) => next(e));
+            }
+        } else {
+            const updatedCampaign = omit(req.body, ommitFields);
+            campaign.updatedBy = userInCharge._id;
 
-        campaign
-            .save()
-            .then(async (savedCampaign) =>
-                res.json(await savedCampaign.transform(req.user))
-            )
-            .catch((e) => next(e));
+            Object.assign(campaign, updatedCampaign);
+
+            campaign
+                .save()
+                .then(async (savedCampaign) =>
+                    res.json(await savedCampaign.transform(req.user))
+                )
+                .catch((e) => next(e));
+        }
     } catch (error) {
         return next(error);
     }
@@ -164,7 +202,7 @@ exports.get = async (req, res) => {
         query.campaignId = req.locals.campaign.id;
     }
     const result = await Promise.all([
-        req.locals.campaign.transform(req.user),
+        req.locals.campaign.transform(req.user, query.isApproval === "true"),
         getComments(req.user, query),
     ]);
 

@@ -219,13 +219,19 @@ export const userRegister = (data, dispatch) => {
         });
 };
 
-export const getCampaign = (campaignId, dispatch, comments = false) => {
+export const getCampaign = (
+    campaignId,
+    dispatch,
+    comments = false,
+    isApproval = false
+) => {
     dispatch({ type: GET_CAMPAIGN_IN_PROGRESS });
 
     instance
         .get(`campaigns/${campaignId}`, {
             params: {
                 comments,
+                isApproval,
             },
             headers: {
                 Authorization: `Bearer ${getLocalStorage().token.accessToken}`,

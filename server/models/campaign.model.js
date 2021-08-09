@@ -9,6 +9,7 @@ const moment = require("moment-timezone");
 const Donation = require("./donation.model");
 const CampaignLike = require("./campaign.like.model");
 const controller = require("../controllers/campaign.controller");
+const CampaignApproval = require("./campaign.approval.model");
 
 /**
  * Campaign Schema
@@ -96,7 +97,6 @@ campaignSchema.statics = {
                     .populate("categoryId")
                     .populate("userId")
                     .exec();
-                console.log("here");
 
                 // const campaign = await Campaign.findById(
                 //     "60ea6a073afc6d5a34e1a193"
@@ -202,7 +202,7 @@ campaignSchema.statics = {
 };
 
 campaignSchema.method({
-    async transform(user) {
+    async transform(user, isApproval = false) {
         try {
             const transformed = {};
             const fields = [
@@ -232,6 +232,20 @@ campaignSchema.method({
                 if (user.rating >= USER_CAMPAIGN_RATING_THRESHOLD)
                     this["isVerifyDocument"] = false;
             }
+
+            //if not verified, check if has approval
+            if (isApproval) {
+                const campaignApproval = await CampaignApproval.findOne({
+                    campaignId: this["id"],
+                }).exec();
+
+                if (campaignApproval && campaignApproval.isApproved === false) {
+                    return await campaignApproval.transform();
+                } else {
+                    isApproval = false;
+                }
+            }
+
             //get the total donations
             let totalDonation = 0;
             let totalLikes = 0;
@@ -346,6 +360,8 @@ campaignSchema.method({
                 ),
             ]);
 
+            transformed["isApproval"] = isApproval;
+            transformed["isApproved"] = true;
             transformed["totalDonation"] = totalDonation;
             transformed["totalLikes"] = totalLikes;
             transformed["like"] = { likable, likeId };

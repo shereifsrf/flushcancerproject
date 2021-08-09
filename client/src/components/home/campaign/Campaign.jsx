@@ -80,11 +80,14 @@ const initData = {
     category: "",
     document: null,
     isVerifyDocument: true,
+    isVerified: false,
     editable: false,
     categories: null,
     imageChanged: false,
     newImage: null,
     expiresAt: addDays(new Date(), 1),
+    isApproved: false,
+    isApproval: false,
 };
 
 const initAlert = {
@@ -115,7 +118,7 @@ export default function Campaign() {
     const classes = useStyles();
     const { campaignId } = useParams();
     const getCampaignData = useCallback(() => {
-        getCampaign(campaignId, dispatch);
+        getCampaign(campaignId, dispatch, false, true);
     }, [campaignId]);
     // const campaign = campaigns.find((c) => c.id === parseInt(campaignId)) || {};
     const isCreate = !campaignId;
@@ -183,6 +186,7 @@ export default function Campaign() {
                     contentText: `Campaign '${state.campaign.name}' successfully updated `,
                     buttonText: "Great",
                 });
+                setData({ ...data, isApproval: true, isApproved: false });
             }
         }
     }, [state]);
@@ -236,6 +240,9 @@ export default function Campaign() {
                     category: category.id,
                     newImage: null,
                     expiresAt: campaign.expiresAt,
+                    isVerified: campaign.isVerified,
+                    isApproval: campaign.isApproval,
+                    isApproved: campaign.isApproved,
                 });
                 imgSrc.current = !isEmpty(document)
                     ? `data:${document.contentType}; base64,${new Buffer.from(
@@ -251,7 +258,6 @@ export default function Campaign() {
     };
 
     const handleSubmit = (e) => {
-        console.log(data);
         e.preventDefault();
         if (
             data.name === "" ||
@@ -259,13 +265,19 @@ export default function Campaign() {
             data.limit === 0 ||
             data.description === "" ||
             data.document === null ||
-            data.expiresAt === "Invalid Date" ||
-            data.expiresAt <= new Date()
+            data.expiresAt === "Invalid Date"
         ) {
             setAlert({
                 open: true,
                 title: "Validation Error",
                 contentText: `Some fields are empty, please fill before submit`,
+                buttonText: "Ok",
+            });
+        } else if (Date.parse(data.expiresAt) <= Date.now()) {
+            setAlert({
+                open: true,
+                title: "Validation Error",
+                contentText: `Please choose valid expiry date`,
                 buttonText: "Ok",
             });
         } else {
@@ -300,6 +312,13 @@ export default function Campaign() {
     const handleAlertOpen = () => {
         setAlert((alert) => ({ ...alert, open: !alert.open }));
     };
+
+    let campaignStatus = "Waiting for approval";
+    if (data.isVerified && data.isApproval === true && !data.isApproved) {
+        campaignStatus = "Waiting for new changes approval";
+    } else if (data.isVerified) {
+        campaignStatus = "Approved";
+    }
 
     return (
         <>
@@ -487,6 +506,16 @@ export default function Campaign() {
                                         )}
                                     </FormControl>
                                 }
+                                <div>
+                                    <TextField
+                                        id="standard-multiline-static"
+                                        label="Status"
+                                        fullWidth
+                                        value={campaignStatus}
+                                        variant="outlined"
+                                        disabled
+                                    />
+                                </div>
                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                                     <KeyboardDatePicker
                                         value={data.expiresAt}
