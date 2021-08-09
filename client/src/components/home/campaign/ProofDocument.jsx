@@ -191,7 +191,7 @@ export default function ProofDocument({ campaignId, verified }) {
                                     new Date(proof.createdAt),
                                     Date.now()
                                 ) > -1 &&
-                                    !verified(
+                                    !verified && (
                                         <Box
                                             display="flex"
                                             justifyContent="flex-end"
