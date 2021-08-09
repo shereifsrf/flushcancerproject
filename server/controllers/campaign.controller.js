@@ -130,16 +130,24 @@ exports.update = async (req, res, next) => {
                 }
             }
         }
+
         if (campaign.isVerified) {
+            if (req.body.isDelete === "true") {
+                req.body.isDelete = true;
+            } else if (req.body.isDelete === "false") {
+                req.body.isDelete = false;
+                req.body.isApproved = true;
+            }
             //get the campaign-approval form and update there
             let campaignApproval = await CampaignApproval.findOne({
                 campaignId: campaign.id,
             }).exec();
 
-            if (campaignApproval && campaignApproval.isApproved) {
+            if (campaignApproval) {
                 Object.assign(campaignApproval, {
-                    ...req.body,
                     isApproved: false,
+                    isReject: false,
+                    ...req.body,
                 });
                 campaignApproval
                     .save()
@@ -167,6 +175,7 @@ exports.update = async (req, res, next) => {
                     .catch((e) => next(e));
             }
         } else {
+            delete req.body.isDelete;
             const updatedCampaign = omit(req.body, ommitFields);
             campaign.updatedBy = userInCharge._id;
 

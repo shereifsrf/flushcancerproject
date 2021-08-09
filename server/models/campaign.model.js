@@ -361,6 +361,7 @@ campaignSchema.method({
             ]);
 
             transformed["isApproval"] = isApproval;
+            transformed["isDelete"] = false;
             transformed["isApproved"] = true;
             transformed["totalDonation"] = totalDonation;
             transformed["totalLikes"] = totalLikes;

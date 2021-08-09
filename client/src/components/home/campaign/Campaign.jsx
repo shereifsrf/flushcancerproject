@@ -19,7 +19,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CloudUpload, Tune } from "@material-ui/icons";
 import { useHistory, useParams } from "react-router-dom";
 import SaveIcon from "@material-ui/icons/Save";
-import { isEmpty } from "lodash";
+import { isEmpty, omit } from "lodash";
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import CancelPresentationIcon from "@material-ui/icons/CancelPresentation";
 import { useEffect } from "react";
@@ -88,6 +88,7 @@ const initData = {
     expiresAt: addDays(new Date(), 1),
     isApproved: false,
     isApproval: false,
+    isDelete: false,
 };
 
 const initAlert = {
@@ -186,7 +187,12 @@ export default function Campaign() {
                     contentText: `Campaign '${state.campaign.name}' successfully updated `,
                     buttonText: "Great",
                 });
-                setData({ ...data, isApproval: true, isApproved: false });
+                setData({
+                    ...data,
+                    isApproval: state.campaign.isApproval,
+                    isApproved: state.campaign.isApproved,
+                    isDelete: state.campaign.isDelete || false,
+                });
             }
         }
     }, [state]);
@@ -243,6 +249,7 @@ export default function Campaign() {
                     isVerified: campaign.isVerified,
                     isApproval: campaign.isApproval,
                     isApproved: campaign.isApproved,
+                    isDelete: campaign.isDelete,
                 });
                 imgSrc.current = !isEmpty(document)
                     ? `data:${document.contentType}; base64,${new Buffer.from(
@@ -281,7 +288,8 @@ export default function Campaign() {
                 buttonText: "Ok",
             });
         } else {
-            if (!isCreate) updateCampaign(campaignId, data, dispatch);
+            if (!isCreate)
+                updateCampaign(campaignId, omit(data, ["isDelete"]), dispatch);
             else createCampaign(data, dispatch);
         }
     };
@@ -296,7 +304,36 @@ export default function Campaign() {
             buttonText: "Yes",
             buttonFn: () => {
                 handleAlertOpen();
-                deleteCampaign(campaignId, dispatch);
+                if (!data.isVerified) deleteCampaign(campaignId, dispatch);
+                else
+                    updateCampaign(
+                        campaignId,
+                        { ...data, isDelete: true },
+                        dispatch
+                    );
+            },
+            other: {
+                secondaryButtonText: "No",
+                secondaryButtonFn: () => handleAlertOpen(),
+            },
+        });
+    };
+
+    const handleCancelDelete = (e) => {
+        e.preventDefault();
+
+        setAlert({
+            open: true,
+            title: "Warning",
+            contentText: `Are you sure to cancel delete request? `,
+            buttonText: "Yes",
+            buttonFn: () => {
+                handleAlertOpen();
+                updateCampaign(
+                    campaignId,
+                    { ...data, isDelete: false },
+                    dispatch
+                );
             },
             other: {
                 secondaryButtonText: "No",
@@ -314,7 +351,13 @@ export default function Campaign() {
     };
 
     let campaignStatus = "Waiting for approval";
-    if (data.isVerified && data.isApproval === true && !data.isApproved) {
+    if (data.isDelete) {
+        campaignStatus = "Waiting for admin to approve deletion";
+    } else if (
+        data.isVerified &&
+        data.isApproval === true &&
+        !data.isApproved
+    ) {
         campaignStatus = "Waiting for new changes approval";
     } else if (data.isVerified) {
         campaignStatus = "Approved";
@@ -506,16 +549,18 @@ export default function Campaign() {
                                         )}
                                     </FormControl>
                                 }
-                                <div>
-                                    <TextField
-                                        id="standard-multiline-static"
-                                        label="Status"
-                                        fullWidth
-                                        value={campaignStatus}
-                                        variant="outlined"
-                                        disabled
-                                    />
-                                </div>
+                                {!isCreate && (
+                                    <div>
+                                        <TextField
+                                            id="standard-multiline-static"
+                                            label="Status"
+                                            fullWidth
+                                            value={campaignStatus}
+                                            variant="outlined"
+                                            disabled
+                                        />
+                                    </div>
+                                )}
                                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                                     <KeyboardDatePicker
                                         value={data.expiresAt}
@@ -575,7 +620,7 @@ export default function Campaign() {
                                     </FormControl>
                                 </div>
                                 <Divider className={classes.divider} />
-                                {!isCreate && (
+                                {!isCreate && !data.isDelete && (
                                     <ProofDocument
                                         campaignId={campaignId}
                                         verified={data.isVerified}
@@ -587,45 +632,50 @@ export default function Campaign() {
                                         container
                                         justifyContent="space-between"
                                     >
-                                        <Grid item>
-                                            <Button
-                                                fullWidth
-                                                variant="contained"
-                                                color="primary"
-                                                type="submit"
-                                                startIcon={
-                                                    !isCreate ? (
-                                                        <SaveIcon />
-                                                    ) : (
-                                                        <AddCircleOutlineIcon />
-                                                    )
-                                                }
-                                            >
-                                                {`${
-                                                    !isCreate
-                                                        ? "Save Changes"
-                                                        : "create Campaign"
-                                                }`}
-                                            </Button>
-                                        </Grid>
-                                        <Grid item>
-                                            <Button
-                                                fullWidth
-                                                variant="contained"
-                                                color="secondary"
-                                                onClick={handleCancel}
-                                                startIcon={
-                                                    <CancelPresentationIcon />
-                                                }
-                                            >
-                                                {`Cancel ${
-                                                    !isCreate
-                                                        ? "Changes"
-                                                        : "Campaign"
-                                                }`}
-                                            </Button>
-                                        </Grid>
-                                        {!isCreate && (
+                                        {!data.isDelete && (
+                                            <>
+                                                {" "}
+                                                <Grid item>
+                                                    <Button
+                                                        fullWidth
+                                                        variant="contained"
+                                                        color="primary"
+                                                        type="submit"
+                                                        startIcon={
+                                                            !isCreate ? (
+                                                                <SaveIcon />
+                                                            ) : (
+                                                                <AddCircleOutlineIcon />
+                                                            )
+                                                        }
+                                                    >
+                                                        {`${
+                                                            !isCreate
+                                                                ? "Save Changes"
+                                                                : "create Campaign"
+                                                        }`}
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Button
+                                                        fullWidth
+                                                        variant="contained"
+                                                        color="secondary"
+                                                        onClick={handleCancel}
+                                                        startIcon={
+                                                            <CancelPresentationIcon />
+                                                        }
+                                                    >
+                                                        {`Cancel ${
+                                                            !isCreate
+                                                                ? "Changes"
+                                                                : "Campaign"
+                                                        }`}
+                                                    </Button>
+                                                </Grid>
+                                            </>
+                                        )}
+                                        {!isCreate && !data.isDelete && (
                                             <Grid item>
                                                 <Button
                                                     variant="contained"
@@ -635,6 +685,19 @@ export default function Campaign() {
                                                     onClick={handleDelete}
                                                 >
                                                     Delete Campaign
+                                                </Button>
+                                            </Grid>
+                                        )}
+                                        {data.isDelete && (
+                                            <Grid item>
+                                                <Button
+                                                    variant="contained"
+                                                    color="secondary"
+                                                    className={classes.button}
+                                                    startIcon={<DeleteIcon />}
+                                                    onClick={handleCancelDelete}
+                                                >
+                                                    Cancel Delete Request
                                                 </Button>
                                             </Grid>
                                         )}

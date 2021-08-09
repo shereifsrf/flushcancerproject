@@ -40,6 +40,16 @@ const campaignApprovalSchema = new mongoose.Schema(
             required: true,
             default: false,
         },
+        isDelete: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+        isReject: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
         limit: {
             type: mongoose.Schema.Types.Decimal128,
             required: true,
@@ -194,6 +204,7 @@ campaignApprovalSchema.method({
                 "isApproved",
                 "remarks",
                 "expiresAt",
+                "isDelete",
             ];
             // console.log(this);
 
