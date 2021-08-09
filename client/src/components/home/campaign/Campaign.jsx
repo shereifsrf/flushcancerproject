@@ -578,6 +578,7 @@ export default function Campaign() {
                                 {!isCreate && (
                                     <ProofDocument
                                         campaignId={campaignId}
+                                        verified={data.isVerified}
                                         isVerifyDocument={data.isVerifyDocument}
                                     />
                                 )}

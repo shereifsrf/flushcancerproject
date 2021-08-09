@@ -32,7 +32,7 @@ const initAlert = {
     other: undefined,
 };
 
-export default function ProofDocument({ campaignId }) {
+export default function ProofDocument({ campaignId, verified }) {
     const classes = useStyles();
     const { state, dispatch } = useAuthContext();
     const [alert, setAlert] = useState(initAlert);
@@ -190,21 +190,22 @@ export default function ProofDocument({ campaignId }) {
                                 {differenceInDays(
                                     new Date(proof.createdAt),
                                     Date.now()
-                                ) > -1 && (
-                                    <Box
-                                        display="flex"
-                                        justifyContent="flex-end"
-                                    >
-                                        <Button
-                                            color="secondary"
-                                            variant="outlined"
-                                            name={proof.id}
-                                            onClick={handleDelete}
+                                ) > -1 &&
+                                    !verified(
+                                        <Box
+                                            display="flex"
+                                            justifyContent="flex-end"
                                         >
-                                            Delete
-                                        </Button>
-                                    </Box>
-                                )}
+                                            <Button
+                                                color="secondary"
+                                                variant="outlined"
+                                                name={proof.id}
+                                                onClick={handleDelete}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Box>
+                                    )}
                             </Box>
                         );
                     })}
