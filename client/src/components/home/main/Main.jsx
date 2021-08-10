@@ -3,11 +3,22 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import { makeStyles } from "@material-ui/core/styles";
 import DonationsDash from "./DonationsDash";
 import CampaignList from "../../general/campaignPublic/CampaignList";
-import { Box, Container, Grid, Typography } from "@material-ui/core";
+import {
+    Box,
+    Container,
+    Grid,
+    Typography,
+    CircularProgress,
+} from "@material-ui/core";
 import { useAuthContext } from "../../AuthProvider";
 import { findRedirection } from "../../../api";
 import { PUBLIC_CAMPAIGNS } from "../../../constants";
 import { Link } from "react-router-dom";
+
+const initData = {
+    loading: true,
+    redirect: false,
+};
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Album() {
     const classes = useStyles();
-    const [redirect, setRedirect] = useState(false);
+    const [data, setData] = useState(initData);
     const { state, dispatch } = useAuthContext();
 
     useLayoutEffect(() => {
@@ -26,14 +37,21 @@ export default function Album() {
 
     useLayoutEffect(() => {
         if (state.status.getRedirectSuccess) {
-            setRedirect(state.redirect);
+            setData({ redirect: state.redirect, loading: false });
+        } else if (state.status.getRedirectFailed) {
+            setData({ redirect: false, loading: false });
         }
     }, [state]);
 
     return (
         <>
             <CssBaseline />
-            {!redirect && (
+            {data.loading && (
+                <Box justifyContent="center" display="flex">
+                    <CircularProgress />
+                </Box>
+            )}
+            {!data.loading && data.redirect && (
                 <Container maxWidth="sm">
                     <Box display="flex" mt={4} justifyContent="center">
                         <Typography variant="h6">No contents here</Typography>
@@ -47,7 +65,7 @@ export default function Album() {
                     </Box>
                 </Container>
             )}
-            {redirect && (
+            {!data.loading && !data.redirect && (
                 <Grid container spacing={3}>
                     <Grid item md={8} lg={8}>
                         <CampaignList dashboard={true} />

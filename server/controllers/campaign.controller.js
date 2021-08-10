@@ -61,10 +61,13 @@ exports.list = async (req, res, next) => {
         if (user && user.role === ADMIN) {
             delete query.isVerified;
         }
+        if (query.expiresAt) {
+            query.expiresAt = { $gte: new Date() };
+        }
         if (user && query && query.dashboard !== "false") {
             // console.log("here", query);
             query = {
-                ...omit(query, ["dashboard", "isVerified"]),
+                ...omit(query, ["dashboard", "isVerified", "expiresAt"]),
                 userId: req.user._id,
             };
             // console.log("here", query);
@@ -72,9 +75,6 @@ exports.list = async (req, res, next) => {
 
         if (query.categoryId) {
             query.categoryId = mongoose.Types.ObjectId(query.categoryId);
-        }
-        if (query.expiresAt) {
-            query.expiresAt = { $gte: new Date() };
         }
         const campaigns = await Campaign.list(query);
 
