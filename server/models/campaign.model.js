@@ -3,12 +3,11 @@ const mongoose = require("mongoose");
 const APIError = require("../utils/APIError");
 const httpStatus = require("http-status");
 const { USER_CAMPAIGN_RATING_THRESHOLD } = require("../config/constants");
-const Category = require("./category.model");
 const User = require("./user.model");
-const moment = require("moment-timezone");
-const Donation = require("./donation.model");
-const CampaignLike = require("./campaign.like.model");
 const controller = require("../controllers/campaign.controller");
+const Category = require("./category.model");
+const moment = require("moment-timezone");
+const CampaignLike = require("./campaign.like.model");
 const CampaignApproval = require("./campaign.approval.model");
 
 /**
@@ -128,6 +127,7 @@ campaignSchema.statics = {
         isVerified,
         minLimit,
         maxLimit,
+        expiresAt,
         search,
     }) {
         let limit = {};
@@ -155,12 +155,13 @@ campaignSchema.statics = {
                 userId,
                 categoryId,
                 isVerified,
+                expiresAt,
                 limit,
             },
             isNil
         );
 
-        console.log(search);
+        // console.log(search);
         let categories = [];
 
         if (search) {

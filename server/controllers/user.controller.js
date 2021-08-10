@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const httpStatus = require("http-status");
 const { omit } = require("lodash");
 const {
@@ -5,6 +6,8 @@ const {
     ADMIN_ONLY_REPLACABLE_USER_FDS,
 } = require("../config/constants");
 const User = require("../models/user.model");
+// const Campaign = require("../models/campaign.model");
+// const Donation = require("../models/donation.model");
 
 /**
  * Load user and append to req.
@@ -110,4 +113,32 @@ exports.remove = (req, res, next) => {
     user.remove()
         .then(() => res.status(httpStatus.NO_CONTENT).end())
         .catch((e) => next(e));
+};
+
+exports.findRediction = async (req, res, next) => {
+    try {
+        //find number of donations
+        const donationCount = await mongoose
+            .model("Donation")
+            .countDocuments({
+                userId: req.user.id,
+            })
+            .exec();
+        //find number of campaigns
+        const campaignCount = await mongoose
+            .model("Campaign")
+            .countDocuments({
+                userId: req.user.id,
+            })
+            .exec();
+
+        //if both none, then redirect true
+        if (donationCount === 0 && campaignCount === 0) {
+            res.send(true);
+        } else {
+            res.send(false);
+        }
+    } catch (e) {
+        next(e);
+    }
 };

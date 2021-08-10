@@ -58,6 +58,8 @@ import {
     DELETE_PROOF_FAILED,
     DELETE_PROOF_SUCCESS,
     CLEAR_STATUS,
+    GET_REDIRECT_FAILED,
+    GET_REDIRECT_SUCCESS,
 } from "../constants";
 
 export const initialState = {
@@ -66,6 +68,7 @@ export const initialState = {
     message: "",
     user: null,
     token: null,
+    redirect: null,
     status: {
         ...clearCampaignStatus,
         ...clearAuthStatus,
@@ -80,13 +83,15 @@ export const initialState = {
         getCategoryListSuccess: false,
         getCategoryListFailed: false,
         getCategoryListInProgress: false,
+        getRedirectSuccess: false,
+        getRedirectFailed: false,
     },
     campaign: null,
     categories: null,
 };
 
 export const reducer = (state, action) => {
-    let data = action.payload || {};
+    let data = action.payload !== undefined ? action.payload : null;
     switch (action.type) {
         case INITIAL:
             return { ...initialState };
@@ -806,6 +811,32 @@ export const reducer = (state, action) => {
                     deleteProofFailed: true,
                 },
             };
+
+        case GET_REDIRECT_SUCCESS:
+            return {
+                ...state,
+                ...clearError,
+                redirect: data,
+                status: {
+                    ...state.status,
+                    getRedirectFailed: false,
+                    getRedirectSuccess: true,
+                },
+            };
+
+        case GET_REDIRECT_FAILED:
+            return {
+                ...state,
+                hasError: true,
+                message: data.message,
+                redirect: null,
+                status: {
+                    ...state.status,
+                    getRedirectSuccess: false,
+                    getRedirectFailed: true,
+                },
+            };
+
         default:
             return state;
     }

@@ -59,6 +59,8 @@ import {
     DELETE_PROOF_FAILED,
     DELETE_PROOF_SUCCESS,
     CLEAR_STATUS,
+    GET_REDIRECT_FAILED,
+    GET_REDIRECT_SUCCESS,
 } from "../constants";
 
 const mode = process.env.NODE_ENV;
@@ -294,6 +296,26 @@ export const getCategoryList = (dispatch) => {
         })
         .catch((error) => {
             return handleFailure(error, GET_CATEGORY_LIST_FAILED, dispatch);
+        });
+};
+
+export const findRedirection = (dispatch) => {
+    instance
+        .get(`users/redirect`, {
+            headers: {
+                Authorization: `Bearer ${getLocalStorage().token.accessToken}`,
+            },
+        })
+        .then((res) => {
+            if (res.status === 200) {
+                return dispatch({
+                    type: GET_REDIRECT_SUCCESS,
+                    payload: res.data,
+                });
+            }
+        })
+        .catch((error) => {
+            return handleFailure(error, GET_REDIRECT_FAILED, dispatch);
         });
 };
 

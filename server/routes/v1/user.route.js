@@ -28,6 +28,8 @@ router
 
     .get(authorize(), controller.loggedIn);
 
+router.route("/redirect").get(authorize(LOGGED_USER), controller.findRediction);
+
 router
     .route("/:userId")
 

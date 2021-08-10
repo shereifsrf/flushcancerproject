@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const httpStatus = require("http-status");
 const { omit, isUndefined, isEmpty, omitBy, isNil } = require("lodash");
 const {
@@ -6,10 +7,9 @@ const {
     DONOR,
     CAMPAIGNER,
 } = require("../config/constants");
+const User = require("../models/user.model");
 const Campaign = require("../models/campaign.model");
 const CampaignComment = require("../models/campaign.comment.model");
-const User = require("../models/user.model");
-const mongoose = require("mongoose");
 const CampaignRating = require("../models/campaign.rating.model");
 const Donation = require("../models/donation.model");
 const CampaignApproval = require("../models/campaign.approval.model");
@@ -73,7 +73,9 @@ exports.list = async (req, res, next) => {
         if (query.categoryId) {
             query.categoryId = mongoose.Types.ObjectId(query.categoryId);
         }
-
+        if (query.expiresAt) {
+            query.expiresAt = { $gte: new Date() };
+        }
         const campaigns = await Campaign.list(query);
 
         let transformedCampaigns = {};

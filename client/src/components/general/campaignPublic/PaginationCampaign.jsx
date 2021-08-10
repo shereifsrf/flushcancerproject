@@ -74,6 +74,8 @@ export default function PaginationCampaign(props) {
                 query.maxLimit = dashData.maxLimit;
             }
 
+            query.expiresAt = { $gte: new Date(Date.now()).toISOString() };
+
             getCampaignList(props.dashboard, dispatch, query);
             setData({ ...data, page: query.page, perPage: query.perPage });
             setDashData({ ...dashData, loading: true, trigger: false });
