@@ -48,7 +48,7 @@ export default function Album() {
         <>
             <CssBaseline />
             {data.loading && (
-                <Box justifyContent="center" display="flex">
+                <Box justifyContent="center" display="flex" mt={4}>
                     <CircularProgress />
                 </Box>
             )}
