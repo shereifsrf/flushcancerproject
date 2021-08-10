@@ -15,6 +15,7 @@ import { findRedirection } from "../../../api";
 import { PUBLIC_CAMPAIGNS } from "../../../constants";
 import { Link } from "react-router-dom";
 
+//init data here
 const initData = {
     loading: true,
     redirect: false,
