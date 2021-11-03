@@ -1,6 +1,5 @@
 # Getting Started flushcancerproject client side
 
-This project is for UOW FYP. The primary purpose of the app is to provide crowdfunding server under a topic "Children battling cancer"
 
 ## Available Scripts
 
